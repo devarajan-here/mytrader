@@ -176,7 +176,7 @@ const TOUR_STEPS = [
   {
     kicker: 'Strategy Simpler',
     title: 'Start from the verified video strategy',
-    description: 'The catalog contains two verified strategies: 1% Athishaktham (NIFTY options) and 20 EMA Pullback Swing (equity). Select a card to see the plain-language rules and editable example.',
+    description: 'The catalog contains three verified strategies: 1% Athishaktham (NIFTY options), 20 EMA Pullback Swing (equity), and Futures Convergence Magic (cash-and-carry arbitrage). Select a card to see the plain-language rules and editable example.',
     view: 'strategies',
     targets: ['#strategy-catalog'],
   },
