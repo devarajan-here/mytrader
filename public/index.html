@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0b1020">
+  <title>MarketMind AI — Learn, research, decide</title>
+  <meta name="description" content="A local-first stock market learning and IPO research workspace with AI document chat.">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="icon-button mobile-menu-button" id="mobile-menu-button" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <a class="brand" href="#dashboard" data-nav="dashboard" aria-label="MarketMind AI home">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span><strong>MarketMind</strong><small>AI research desk</small></span>
+      </a>
+      <div class="topbar-center">
+        <span class="market-label"><span class="live-dot"></span> Personal workspace</span>
+        <span id="today-label"></span>
+      </div>
+      <div class="topbar-actions">
+        <button class="connection-pill" id="connection-pill" type="button" title="AI connection status">
+          <span class="connection-dot"></span><span id="connection-label">Checking AI</span>
+        </button>
+        <button class="button secondary compact tour-launch-button" id="start-tour-button" type="button" aria-label="Take a guided tour"><span aria-hidden="true">?</span><span class="tour-launch-label">Tour</span></button>
+        <button class="button primary compact" id="open-coach-button" type="button">Ask AI <span aria-hidden="true">↗</span></button>
+      </div>
+    </header>
+
+    <aside class="sidebar" id="sidebar" aria-label="Primary navigation">
+      <nav>
+        <p class="nav-label">Workspace</p>
+        <a href="#dashboard" class="nav-item active" data-nav="dashboard"><span aria-hidden="true">⌂</span> Overview</a>
+        <a href="#learning" class="nav-item" data-nav="learning"><span aria-hidden="true">✓</span> Learning path <em id="nav-learning-count">0%</em></a>
+        <a href="#ipos" class="nav-item" data-nav="ipos"><span aria-hidden="true">◫</span> IPO watch <em id="nav-ipo-count">3</em></a>
+        <a href="#strategies" class="nav-item" data-nav="strategies"><span aria-hidden="true">⌁</span> Strategies <em id="nav-strategy-count">1</em></a>
+      </nav>
+
+      <div class="sidebar-card">
+        <div class="sidebar-card-icon">✦</div>
+        <strong>Research with evidence</strong>
+        <p>Attach an RHP, financials, chart, or ratio export and question the documents directly.</p>
+        <button class="text-button" id="sidebar-chat-button" type="button">Open AI copilot →</button>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="nav-item button-reset" id="export-data-button" type="button"><span aria-hidden="true">⇩</span> Export my data</button>
+        <label class="nav-item import-label"><span aria-hidden="true">⇧</span> Import backup<input id="import-data-input" type="file" accept="application/json"></label>
+      </div>
+    </aside>
+
+    <div class="menu-scrim" id="menu-scrim"></div>
+
+    <div class="workspace">
+      <main class="main-content" id="main-content">
+        <section class="page-view active" id="view-dashboard" data-view="dashboard">
+          <div class="hero-panel">
+            <div class="hero-copy">
+              <span class="eyebrow">Your market operating system</span>
+              <h1>Learn the craft.<br><span>Interrogate the evidence.</span></h1>
+              <p>One focused desk for building market skills, tracking active IPOs, and getting document-grounded answers without retyping research prompts.</p>
+              <div class="hero-actions">
+                <button class="button primary" id="hero-chat-button" type="button">Start a research chat <span>↗</span></button>
+                <button class="button secondary" data-go="learning" type="button">Continue learning</button>
+              </div>
+            </div>
+            <div class="signal-card" aria-label="Research workflow">
+              <div class="signal-head"><span>Research workflow</span><span class="signal-badge">4 steps</span></div>
+              <ol>
+                <li class="complete"><span>01</span><div><strong>Choose a company</strong><small>IPO or listed equity</small></div></li>
+                <li><span>02</span><div><strong>Attach evidence</strong><small>PDFs, chart, ratios</small></div></li>
+                <li><span>03</span><div><strong>Ask the hard question</strong><small>Streamed AI analysis</small></div></li>
+                <li><span>04</span><div><strong>Record your view</strong><small>Notes persist locally</small></div></li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="metric-grid">
+            <article class="metric-card accent">
+              <div class="metric-top"><span>Curriculum</span><span class="metric-icon">↗</span></div>
+              <strong id="metric-progress">0%</strong>
+              <div class="mini-progress"><i id="metric-progress-bar"></i></div>
+              <small id="metric-progress-copy">0 of 0 lessons complete</small>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top"><span>Current module</span><span class="metric-icon">◎</span></div>
+              <strong class="metric-text" id="metric-current-module">Market basics</strong>
+              <small id="metric-current-copy">Start with the foundations</small>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top"><span>Open IPOs</span><span class="metric-icon">◫</span></div>
+              <strong id="metric-open-ipos">0</strong>
+              <small id="metric-ipo-copy">Based on saved dates</small>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top"><span>AI desk</span><span class="metric-icon">✦</span></div>
+              <strong class="metric-text" id="metric-ai-status">Connecting</strong>
+              <small id="metric-ai-model">Secure server integration</small>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel learning-preview-panel">
+              <div class="panel-head">
+                <div><span class="section-kicker">Learning path</span><h2>Keep the momentum</h2></div>
+                <button class="text-button" data-go="learning" type="button">View all modules →</button>
+              </div>
+              <div id="dashboard-learning-list" class="dashboard-learning-list"></div>
+            </section>
+
+            <section class="panel ipo-preview-panel">
+              <div class="panel-head">
+                <div><span class="section-kicker">IPO watch</span><h2>Research queue</h2></div>
+                <button class="text-button" data-go="ipos" type="button">View all →</button>
+              </div>
+              <div id="dashboard-ipo-list" class="dashboard-ipo-list"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="page-view" id="view-learning" data-view="learning">
+          <div class="page-heading">
+            <div><span class="eyebrow">11-module curriculum</span><h1>Learning path</h1><p>Build durable market judgment one practical lesson at a time.</p></div>
+            <div class="progress-orbit" id="learning-orbit" aria-label="Overall learning progress"><span>0%</span></div>
+          </div>
+
+          <div class="learning-toolbar panel">
+            <div class="toolbar-summary"><strong id="learning-done-count">0</strong><span>complete</span><i></i><strong id="learning-left-count">0</strong><span>remaining</span></div>
+            <div class="filters">
+              <label><span class="sr-only">Filter status</span><select id="filter-status"><option value="all">All status</option><option value="pending">Pending</option><option value="done">Completed</option></select></label>
+              <label><span class="sr-only">Filter priority</span><select id="filter-priority"><option value="all">All priority</option><option value="High">High priority</option><option value="Medium">Medium priority</option><option value="Low">Low priority</option></select></label>
+              <label><span class="sr-only">Filter difficulty</span><select id="filter-difficulty"><option value="all">All levels</option><option value="Beginner">Beginner</option><option value="Intermediate">Intermediate</option><option value="Advanced">Advanced</option></select></label>
+            </div>
+          </div>
+          <div class="module-list" id="module-list"></div>
+        </section>
+
+        <section class="page-view" id="view-ipos" data-view="ipos">
+          <div class="page-heading ipo-page-heading">
+            <div><span class="eyebrow">Due diligence workspace</span><h1>IPO watch</h1><p>Track dates, capture findings, attach the filing, and move straight into analysis.</p></div>
+            <div class="ipo-heading-actions">
+              <button class="button secondary" id="refresh-ipos-button" type="button"><span aria-hidden="true">↻</span> Refresh live</button>
+              <button class="button primary" id="add-ipo-button" type="button">+ Add IPO</button>
+            </div>
+          </div>
+
+          <div class="notice-bar" id="ipo-source-banner">
+            <span class="notice-icon" id="ipo-source-icon">↻</span>
+            <p><strong id="ipo-source-title">Connecting to NSE India…</strong> <span id="ipo-source-detail">Saved records remain available while the live feed loads.</span></p>
+            <a id="ipo-source-link" href="https://www.nseindia.com/market-data/all-upcoming-issues-ipo" target="_blank" rel="noopener noreferrer">NSE source ↗</a>
+          </div>
+
+          <div class="ipo-summary-strip panel">
+            <div><strong id="ipo-strip-open">0</strong><span>Open</span></div>
+            <div><strong id="ipo-strip-closing">0</strong><span>Closing today</span></div>
+            <div><strong id="ipo-strip-upcoming">0</strong><span>Upcoming</span></div>
+            <div><strong id="ipo-strip-research">0</strong><span>With notes</span></div>
+          </div>
+
+          <div class="ipo-list" id="ipo-list"></div>
+        </section>
+
+        <section class="page-view" id="view-strategies" data-view="strategies">
+          <div id="strategy-catalog-view">
+            <div class="page-heading strategy-page-heading">
+              <div><span class="eyebrow">Strategy Simpler</span><h1>Choose a strategy</h1><p>Understand the setup, test the payoff, and define the stop before considering a trade.</p></div>
+              <div class="strategy-count-badge"><strong id="strategy-count">1</strong><span id="strategy-count-label">strategy</span></div>
+            </div>
+
+            <div class="strategy-warning">
+              <span>!</span>
+              <p><strong>Educational simulator only.</strong> Payoffs ignore brokerage, taxes, slippage, early-exit option value, volatility changes, and margin changes. Verify the current contract specification before trading.</p>
+            </div>
+            <div class="strategy-catalog" id="strategy-catalog"></div>
+          </div>
+
+          <div id="strategy-detail-view" hidden>
+            <button class="strategy-back" id="strategy-back-button" type="button">← Back to all strategies</button>
+            <div class="strategy-detail-head">
+              <div><span class="eyebrow" id="strategy-detail-source">Strategy Simpler</span><h1 id="strategy-detail-name">Strategy</h1><p id="strategy-detail-subtitle"></p></div>
+              <span class="strategy-risk" id="strategy-detail-risk">Advanced</span>
+            </div>
+
+            <div class="strategy-summary-grid">
+              <article><span>Entry timing</span><strong id="strategy-entry-timing"></strong></article>
+              <article><span>Target</span><strong id="strategy-target-roi"></strong></article>
+              <article><span>Underlying</span><strong id="strategy-underlying"></strong></article>
+              <article><span>Stop method</span><strong id="strategy-stop-method"></strong></article>
+            </div>
+
+            <div class="strategy-market-note" id="strategy-market-note"></div>
+
+            <section class="panel strategy-formula-panel" id="strategy-formula-panel">
+              <div class="formula-head">
+                <div><span class="section-kicker">Decision worksheet</span><h2>1% Athishaktham formula</h2><p>Write the reason first, then confirm that the strikes, premium, profit, and stop all match your plan.</p></div>
+                <div class="formula-head-actions"><button class="text-button" id="formula-reset-video-button" type="button">Use video example</button><span class="formula-auto-badge">Auto-calculated</span></div>
+              </div>
+
+              <div class="formula-context-grid">
+                <article><span>Underlying</span><strong id="formula-underlying">NIFTY</strong></article>
+                <article><span>Where is it now?</span><strong id="formula-spot">—</strong></article>
+                <article><span>Expiry date</span><strong id="formula-expiry">—</strong></article>
+                <article><span>Estimated ROI</span><strong id="formula-roi">—</strong></article>
+                <article><span>Position P&amp;L</span><strong id="formula-position-pnl">₹0</strong></article>
+              </div>
+
+              <label class="formula-thesis"><span>Why this expiry and range?</span><textarea id="formula-thesis-reason" rows="2" maxlength="500" placeholder="Write your market view, event risk, support/resistance, volatility, or other evidence…"></textarea></label>
+
+              <div class="formula-range-grid">
+                <article class="formula-side call">
+                  <div class="formula-side-head"><div><span>Upper boundary</span><h3>How high will it not go?</h3></div><span>Call side</span></div>
+                  <label class="formula-level"><span>Upper level</span><input id="formula-upper-level" type="number" min="0" step="50"></label>
+                  <label class="formula-reason"><span>Why? Reason</span><textarea id="formula-upper-reason" rows="3" maxlength="500" placeholder="Why should NIFTY stay below this level by expiry?"></textarea></label>
+                  <div class="formula-actions"><div><span>Call sell</span><strong id="formula-call-sell">—</strong></div><div><span>Call buy protection</span><strong id="formula-call-buy">—</strong></div></div>
+                </article>
+
+                <article class="formula-side put">
+                  <div class="formula-side-head"><div><span>Lower boundary</span><h3>How low will it not go?</h3></div><span>Put side</span></div>
+                  <label class="formula-level"><span>Lower level</span><input id="formula-lower-level" type="number" min="0" step="50"></label>
+                  <label class="formula-reason"><span>Why? Reason</span><textarea id="formula-lower-reason" rows="3" maxlength="500" placeholder="Why should NIFTY stay above this level by expiry?"></textarea></label>
+                  <div class="formula-actions"><div><span>Put sell</span><strong id="formula-put-sell">—</strong></div><div><span>Put buy protection</span><strong id="formula-put-buy">—</strong></div></div>
+                </article>
+              </div>
+
+              <div class="formula-tracking-title"><div><span class="section-kicker">Position P&amp;L tracking</span><h3>Premium, maximum profit, and 3× stop</h3></div><p>Calculated from the current simulator premiums, lot size, and number of lots.</p></div>
+              <div class="formula-tracking-grid">
+                <article>
+                  <div class="formula-tracker-head"><strong>Call-side tracking</strong><span id="formula-call-contract">—</span></div>
+                  <dl>
+                    <div><dt>Sell-leg premium</dt><dd id="formula-call-sell-premium">—</dd></div>
+                    <div><dt>Buy-leg premium</dt><dd id="formula-call-buy-premium">—</dd></div>
+                    <div class="emphasis"><dt>Premium difference</dt><dd id="formula-call-difference">—</dd></div>
+                    <div class="emphasis"><dt>Maximum profit</dt><dd id="formula-call-max-profit">—</dd></div>
+                    <div class="stop"><dt>Stop-loss (3×)</dt><dd id="formula-call-stop">—</dd></div>
+                  </dl>
+                </article>
+                <article>
+                  <div class="formula-tracker-head"><strong>Put-side tracking</strong><span id="formula-put-contract">—</span></div>
+                  <dl>
+                    <div><dt>Sell-leg premium</dt><dd id="formula-put-sell-premium">—</dd></div>
+                    <div><dt>Buy-leg premium</dt><dd id="formula-put-buy-premium">—</dd></div>
+                    <div class="emphasis"><dt>Premium difference</dt><dd id="formula-put-difference">—</dd></div>
+                    <div class="emphasis"><dt>Maximum profit</dt><dd id="formula-put-max-profit">—</dd></div>
+                    <div class="stop"><dt>Stop-loss (3×)</dt><dd id="formula-put-stop">—</dd></div>
+                  </dl>
+                </article>
+              </div>
+            </section>
+
+            <section class="panel strategy-market-chart-panel" id="strategy-market-chart-panel">
+              <div class="market-chart-head">
+                <div>
+                  <span class="section-kicker">Live price context</span>
+                  <h2>NIFTY trading chart</h2>
+                  <p>Use candles, intervals, indicators, and drawing tools to test whether your planned range makes sense before starting the sample trade.</p>
+                </div>
+                <a class="text-button" href="https://www.tradingview.com/chart/?symbol=NSE%3ANIFTY" target="_blank" rel="noopener noreferrer">Open full chart ↗</a>
+              </div>
+
+              <div class="chart-strategy-strip" aria-label="Current strategy levels">
+                <article class="put"><span>Lower boundary</span><strong id="market-chart-lower">—</strong><small id="market-chart-put-leg">Put side</small></article>
+                <article class="spot"><span>Current NIFTY</span><strong id="market-chart-spot">—</strong><small id="market-chart-expiry">Expiry —</small></article>
+                <article class="call"><span>Upper boundary</span><strong id="market-chart-upper">—</strong><small id="market-chart-call-leg">Call side</small></article>
+              </div>
+
+              <div class="tradingview-chart-shell">
+                <div class="tradingview-widget-container">
+                  <div class="tradingview-widget-container__widget"></div>
+                  <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/symbols/NSE-NIFTY/" rel="noopener nofollow" target="_blank"><span>NIFTY chart</span></a> by TradingView</div>
+                  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+                    {
+                      "autosize": true,
+                      "symbol": "NSE:NIFTY",
+                      "interval": "15",
+                      "timezone": "Asia/Kolkata",
+                      "theme": "dark",
+                      "backgroundColor": "#09101e",
+                      "gridColor": "rgba(82, 96, 121, 0.18)",
+                      "style": "1",
+                      "locale": "en",
+                      "allow_symbol_change": true,
+                      "save_image": true,
+                      "calendar": false,
+                      "details": false,
+                      "hide_side_toolbar": false,
+                      "hide_top_toolbar": false,
+                      "hide_legend": false,
+                      "hide_volume": false,
+                      "hotlist": false,
+                      "withdateranges": true,
+                      "studies": ["STD;EMA", "STD;RSI"]
+                    }
+                  </script>
+                </div>
+              </div>
+              <p class="market-chart-footnote"><strong>Chart context only.</strong> TradingView data can be delayed depending on the exchange and your plan. Option-chain prices and simulated fills below continue to come from the app's NSE data feed.</p>
+            </section>
+
+            <section class="panel live-paper-panel" id="live-paper-panel">
+              <div class="live-paper-head">
+                <div>
+                  <span class="section-kicker">Real NSE data · simulated orders only</span>
+                  <h2>Real-data paper trade</h2>
+                  <p>Load the latest NIFTY option-chain snapshot and build the video setup without sending any order to a broker. Exchange data use is subject to NSE terms.</p>
+                </div>
+                <span class="market-state-badge loading" id="live-market-status">Waiting for data</span>
+              </div>
+
+              <div class="live-paper-toolbar">
+                <label><span>Expiry</span><select id="live-expiry-select" aria-label="NIFTY option expiry"><option value="">Nearest weekly expiry</option></select></label>
+                <button class="button secondary" id="load-live-market-button" type="button"><span aria-hidden="true">↻</span> Load real NSE data</button>
+                <a class="text-button" id="live-market-source" href="https://www.nseindia.com/option-chain?symbol=NIFTY" target="_blank" rel="noopener noreferrer">Open NSE source ↗</a>
+              </div>
+
+              <div class="live-market-metrics">
+                <article><span>NIFTY spot</span><strong id="live-nifty-spot">—</strong><small id="live-nifty-change">Waiting</small></article>
+                <article><span>Exchange time</span><strong id="live-exchange-time">—</strong><small id="live-fetch-time">Not loaded</small></article>
+                <article><span>Selected expiry</span><strong id="live-selected-expiry">—</strong><small>Nearest contract by default</small></article>
+                <article><span>Official lot size</span><strong id="live-lot-size">—</strong><small>NSE permitted-lot file</small></article>
+              </div>
+
+              <div class="live-setup-message" id="live-setup-message"><span>i</span><p>Real quotes will replace the video's example spot, strikes, premiums, and lot size. You can reset to the video example anytime.</p></div>
+
+              <div class="paper-trade-bar">
+                <div><strong>Sample trading mode</strong><p>Uses bid/ask prices for a conservative paper fill. No brokerage account is connected and no real order can be placed.</p></div>
+                <div class="paper-trade-actions">
+                  <button class="button primary" id="start-paper-trade-button" type="button" disabled>Start paper trade</button>
+                  <button class="button secondary" id="end-paper-trade-button" type="button" hidden>End sample</button>
+                </div>
+              </div>
+
+              <div class="paper-trade-summary" id="paper-trade-summary" hidden>
+                <div class="paper-trade-summary-head"><div><span class="paper-live-dot"></span><strong>Paper position active</strong></div><span id="paper-trade-started">—</span></div>
+                <div class="paper-trade-metrics">
+                  <article><span>Entry credit</span><strong id="paper-entry-credit">₹0</strong></article>
+                  <article><span>Current P&amp;L</span><strong id="paper-current-pnl">₹0</strong></article>
+                  <article><span>Entry NIFTY</span><strong id="paper-entry-spot">—</strong></article>
+                  <article><span>Latest NIFTY</span><strong id="paper-current-spot">—</strong></article>
+                </div>
+                <p id="paper-trade-note">Refresh real data to mark the position using current executable bid/ask prices.</p>
+              </div>
+            </section>
+
+            <div class="strategy-detail-grid">
+              <div class="strategy-info-column">
+                <section class="panel strategy-rules-panel">
+                  <div class="panel-head"><div><span class="section-kicker">Plain-language plan</span><h2>Strategy rules</h2></div></div>
+                  <ol id="strategy-rules"></ol>
+                  <a class="strategy-video-link" id="strategy-video-link" target="_blank" rel="noopener noreferrer" hidden>Watch the source video ↗</a>
+                </section>
+
+                <section class="panel pnl-tracker-panel">
+                  <div class="panel-head"><div><span class="section-kicker">Live discipline</span><h2>P&amp;L and stop tracker</h2></div><button class="text-button" id="reset-pnl-button" type="button">Reset</button></div>
+                  <p>Enter the current profit or loss from your broker. Use a minus sign for a loss.</p>
+                  <div class="pnl-inputs" id="pnl-inputs"></div>
+                  <div class="pnl-total-row"><span>Combined current P&amp;L</span><strong id="pnl-current-total">₹0</strong></div>
+                  <div class="stop-alert" id="strategy-stop-alert"><span class="stop-alert-icon">✓</span><div><strong>Within the planned limit</strong><p>Your entered P&amp;L has not reached the strategy stop.</p></div></div>
+                </section>
+              </div>
+
+              <section class="panel payoff-panel">
+                <div class="panel-head"><div><span class="section-kicker">Reusable simulator</span><h2>Expiry payoff</h2></div><button class="text-button" id="reset-strategy-button" type="button">Reset inputs</button></div>
+                <div class="strategy-base-inputs">
+                  <label><span>Spot reference</span><input id="strategy-spot" type="number" step="50"></label>
+                  <label><span>Lot size</span><input id="strategy-lot-size" type="number" min="1" step="1"></label>
+                  <label><span>Lots</span><input id="strategy-lots" type="number" min="1" max="50" value="1"></label>
+                  <label><span>Capital used</span><input id="strategy-capital" type="number" min="1" step="1000"></label>
+                </div>
+                <div class="strategy-leg-table">
+                  <div class="leg-table-head"><span>Leg</span><span>Strike</span><span>Entry premium</span></div>
+                  <div id="strategy-leg-inputs"></div>
+                </div>
+
+                <div class="payoff-chart-wrap">
+                  <svg id="payoff-chart" viewBox="0 0 700 280" role="img" aria-labelledby="payoff-chart-title payoff-chart-description">
+                    <title id="payoff-chart-title">Strategy expiry payoff chart</title>
+                    <desc id="payoff-chart-description">Profit and loss across a range of expiry prices.</desc>
+                  </svg>
+                </div>
+                <div class="payoff-metrics">
+                  <article><span>Maximum profit</span><strong id="strategy-max-profit">₹0</strong></article>
+                  <article><span>Maximum loss</span><strong id="strategy-max-loss">₹0</strong></article>
+                  <article><span>Credit received</span><strong id="strategy-credit">₹0</strong></article>
+                  <article><span>Return on capital</span><strong id="strategy-roi">0%</strong></article>
+                </div>
+                <p class="payoff-footnote">Expiry-only estimate. Actual P&amp;L before expiry changes with time, volatility, liquidity, charges, and execution.</p>
+              </section>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="coach-panel" id="coach-panel" aria-label="AI research copilot">
+        <div class="coach-head">
+          <div class="coach-identity"><span class="ai-avatar">✦</span><div><strong>MarketMind Copilot</strong><span><i id="coach-status-dot"></i><span id="coach-status-text">Connecting</span></span></div></div>
+          <div class="coach-head-actions">
+            <button class="icon-button" id="clear-chat-button" type="button" title="Clear chat" aria-label="Clear chat">↺</button>
+            <button class="icon-button coach-close" id="close-coach-button" type="button" aria-label="Close AI copilot">×</button>
+          </div>
+        </div>
+
+        <div class="coach-controls">
+          <label><span>Mode</span><select id="chat-mode"><option value="general">Research copilot</option><option value="ipo">IPO teardown</option><option value="tutor">Learning tutor</option><option value="risk">Risk reviewer</option></select></label>
+          <label><span>Company context</span><select id="chat-ipo-select"><option value="">No IPO selected</option></select></label>
+        </div>
+
+        <div class="chat-messages" id="chat-messages" aria-live="polite"></div>
+
+        <div class="quick-prompts" id="quick-prompts">
+          <button type="button" data-prompt="Give me a fast IPO due-diligence checklist for this company.">Due-diligence checklist</button>
+          <button type="button" data-prompt="What are the three biggest risks I should investigate first?">Find the red flags</button>
+          <button type="button" data-prompt="Explain the attached financials in plain language and flag weak cash conversion.">Read the financials</button>
+        </div>
+
+        <div class="attachment-tray" id="attachment-tray"></div>
+        <form class="composer" id="chat-form">
+          <label class="attach-button" title="Attach documents">＋<input id="attachment-input" type="file" multiple accept=".pdf,.txt,.csv,.json,.png,.jpg,.jpeg,.webp"></label>
+          <textarea id="chat-input" rows="1" maxlength="12000" placeholder="Ask about a company, filing, ratio, or chart…" aria-label="Message MarketMind Copilot"></textarea>
+          <button class="send-button" id="send-button" type="submit" aria-label="Send message">↑</button>
+        </form>
+        <p class="coach-disclaimer">AI can be wrong. Verify figures against primary filings before making decisions.</p>
+      </aside>
+      <div class="coach-scrim" id="coach-scrim"></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="ipo-modal" role="dialog" aria-modal="true" aria-labelledby="ipo-modal-title" hidden>
+    <form class="modal-card" id="ipo-form">
+      <div class="modal-head"><div><span class="section-kicker">Research queue</span><h2 id="ipo-modal-title">Add an IPO</h2></div><button class="icon-button" id="close-ipo-modal" type="button" aria-label="Close">×</button></div>
+      <div class="modal-fields">
+        <label class="full"><span>Company name</span><input name="name" required maxlength="120" placeholder="e.g. Company Limited"></label>
+        <label><span>Opens</span><input name="openDate" type="date" required></label>
+        <label><span>Closes</span><input name="closeDate" type="date" required></label>
+        <label><span>Price band</span><input name="priceBand" maxlength="40" placeholder="₹100 – ₹110"></label>
+        <label><span>Lot size</span><input name="lotSize" inputmode="numeric" maxlength="20" placeholder="135 shares"></label>
+        <label class="full"><span>RHP / official detail URL</span><input name="link" type="url" placeholder="https://..."></label>
+      </div>
+      <div class="modal-actions"><button class="button secondary" id="cancel-ipo-modal" type="button">Cancel</button><button class="button primary" type="submit">Add to watchlist</button></div>
+    </form>
+  </div>
+
+  <div class="tour-layer" id="tour-layer" hidden>
+    <div class="tour-highlight" id="tour-highlight" aria-hidden="true"></div>
+    <section class="tour-card" id="tour-card" role="dialog" aria-modal="true" aria-labelledby="tour-title" aria-describedby="tour-description" tabindex="-1">
+      <div class="tour-progress-track"><i id="tour-progress-bar"></i></div>
+      <div class="tour-card-head">
+        <span id="tour-step-count">Step 1 of 11</span>
+        <button class="tour-close" id="tour-close-button" type="button" aria-label="Skip guided tour">×</button>
+      </div>
+      <span class="tour-kicker" id="tour-kicker">Welcome</span>
+      <h2 id="tour-title">Your workspace, explained</h2>
+      <p id="tour-description"></p>
+      <div class="tour-dots" id="tour-dots" aria-hidden="true"></div>
+      <div class="tour-actions">
+        <button class="button secondary" id="tour-back-button" type="button">Back</button>
+        <button class="button primary" id="tour-next-button" type="button">Next</button>
+      </div>
+      <p class="tour-keyboard-hint">Use ← → to move · Esc to close</p>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

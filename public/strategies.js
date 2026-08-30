@@ -1,0 +1,37 @@
+export const STRATEGIES = [
+  {
+    id: 'athishaktham-1pct',
+    name: '1% Athishaktham',
+    subtitle: 'A calm, four-leg weekly range trade that collects small premiums on both sides with protection already in place.',
+    targetROI: 'About 1% weekly in the video example',
+    entryTiming: 'Day before weekly expiry, after 9:30 AM',
+    videoUrl: 'https://youtu.be/mEoxn5-zcOg?si=m_cjwx6SpBx40qBF',
+    source: 'Sharique Samsudheen — My Option Selling Trading Strategy Revealed',
+    risk: 'Advanced',
+    accent: 'lime',
+    stopLossMultiplier: 3,
+    marketNote: 'The 2024 video entered on Wednesday for Thursday expiry. NSE NIFTY weekly options now expire on Tuesday, so a current day-before-expiry interpretation would be Monday. Re-test before using that adaptation.',
+    rules: [
+      'First mark an upper and lower level that NIFTY is unlikely to cross before expiry.',
+      'On the call side, sell an option trading near ₹8–₹10 and buy a call 150 points farther away as protection.',
+      'Repeat on the put side: sell near ₹8–₹10 and buy a put 150 points farther away.',
+      'Aim for roughly ₹6 net credit on each side after subtracting the protection cost.',
+      'Place each protection buy before its sell order so the hedge and margin benefit are in place first.',
+      'If one side loses 3× that side’s maximum profit, close only that side: exit the sell leg first, then its protection.',
+      'Base rule: if neither side hits its stop, leave the position until expiry. Do not treat optional adjustments as part of the base setup.',
+    ],
+    simulator: {
+      underlying: 'NIFTY',
+      spot: 22240,
+      lotSize: 25,
+      capital: 30000,
+      range: 750,
+      legs: [
+        { id: 'longPut', label: 'Buy lower put', action: 'buy', type: 'put', strike: 21750, premium: 4, side: 'put' },
+        { id: 'shortPut', label: 'Sell put', action: 'sell', type: 'put', strike: 21900, premium: 10, side: 'put' },
+        { id: 'shortCall', label: 'Sell call', action: 'sell', type: 'call', strike: 22650, premium: 10, side: 'call' },
+        { id: 'longCall', label: 'Buy upper call', action: 'buy', type: 'call', strike: 22800, premium: 4, side: 'call' },
+      ],
+    },
+  },
+];
