@@ -486,7 +486,7 @@ function setSecurityHeaders(res) {
   res.setHeader('Referrer-Policy', 'no-referrer');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
+  res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data: https://*.tradingview.com https://*.tvcdn.io; style-src 'self' 'unsafe-inline' https://*.tradingview.com; script-src 'self' https://s3.tradingview.com https://*.tradingview.com 'unsafe-inline'; frame-src https://*.tradingview.com; connect-src 'self' https://*.tradingview.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
 }
 
 function sendJson(res, status, body) {
