@@ -24,6 +24,13 @@
         <span id="today-label"></span>
       </div>
       <div class="topbar-actions">
+        <div class="auth-bar" id="auth-bar">
+          <button class="user-profile-pill" id="user-profile-btn" type="button" aria-label="Account details">
+            <span class="user-avatar" id="topbar-user-avatar">👤</span>
+            <span class="user-pill-text" id="topbar-user-name">Sign in</span>
+            <span class="role-badge" id="topbar-user-role" hidden>Admin</span>
+          </button>
+        </div>
         <button class="connection-pill" id="connection-pill" type="button" title="AI connection status">
           <span class="connection-dot"></span><span id="connection-label">Checking AI</span>
         </button>
@@ -39,6 +46,7 @@
         <a href="#learning" class="nav-item" data-nav="learning"><span aria-hidden="true">✓</span> Learning path <em id="nav-learning-count">0%</em></a>
         <a href="#ipos" class="nav-item" data-nav="ipos"><span aria-hidden="true">◫</span> IPO watch <em id="nav-ipo-count">3</em></a>
         <a href="#strategies" class="nav-item" data-nav="strategies"><span aria-hidden="true">⌁</span> Strategies <em id="nav-strategy-count">1</em></a>
+        <a href="#admin" class="nav-item" data-nav="admin" id="nav-admin-item" hidden><span aria-hidden="true">🛡️</span> Admin approvals <em id="nav-pending-count">0</em></a>
       </nav>
 
       <div class="sidebar-card">
@@ -93,9 +101,9 @@
               <small id="metric-current-copy">Start with the foundations</small>
             </article>
             <article class="metric-card">
-              <div class="metric-top"><span>Open IPOs</span><span class="metric-icon">◫</span></div>
+              <div class="metric-top"><span>Tracked IPOs</span><span class="metric-icon">◫</span></div>
               <strong id="metric-open-ipos">0</strong>
-              <small id="metric-ipo-copy">Based on saved dates</small>
+              <small id="metric-ipo-copy">Active and upcoming issues</small>
             </article>
             <article class="metric-card">
               <div class="metric-top"><span>AI desk</span><span class="metric-icon">✦</span></div>
@@ -145,6 +153,7 @@
             <div><span class="eyebrow">Due diligence workspace</span><h1>IPO watch</h1><p>Track dates, capture findings, attach the filing, and move straight into analysis.</p></div>
             <div class="ipo-heading-actions">
               <button class="button secondary" id="refresh-ipos-button" type="button"><span aria-hidden="true">↻</span> Refresh live</button>
+              <button class="button secondary" id="open-sheet-sync-button" type="button"><span aria-hidden="true">📊</span> Google Sheets &amp; CSV Sync</button>
               <button class="button primary" id="add-ipo-button" type="button">+ Add IPO</button>
             </div>
           </div>
@@ -351,7 +360,9 @@
                 <section class="panel strategy-rules-panel">
                   <div class="panel-head"><div><span class="section-kicker">Plain-language plan</span><h2>Strategy rules</h2></div></div>
                   <ol id="strategy-rules"></ol>
-                  <a class="strategy-video-link" id="strategy-video-link" target="_blank" rel="noopener noreferrer" hidden>Watch the source video ↗</a>
+                  <div class="strategy-video-links-wrap" id="strategy-video-links-wrap">
+                    <a class="strategy-video-link" id="strategy-video-link" target="_blank" rel="noopener noreferrer" hidden>Watch the source video ↗</a>
+                  </div>
                 </section>
 
                 <section class="panel pnl-tracker-panel">
@@ -391,40 +402,153 @@
                 <p class="payoff-footnote">Expiry-only estimate. Actual P&amp;L before expiry changes with time, volatility, liquidity, charges, and execution.</p>
               </section>
             </div>
+
+            <!-- Fully Worked Dummy Trade & Position Sizing Framework -->
+            <section class="panel strategy-case-study-panel" id="strategy-case-study-panel" hidden>
+              <div class="panel-head">
+                <div>
+                  <span class="section-kicker">Worked Framework & Real Data</span>
+                  <h2 id="case-study-title">Fully Worked Dummy Trade — Tata Motors Ltd (NSE: TMCV)</h2>
+                </div>
+                <span class="strategy-tag-badge" id="case-study-badge">Live Case Study</span>
+              </div>
+              <div id="case-study-content">
+                <!-- Injected dynamically via renderCaseStudy() -->
+              </div>
+            </section>
           </div>
+        </section>
+
+        <!-- Admin Approvals Section -->
+        <section class="page-view" id="view-admin" data-view="admin">
+          <div class="page-heading">
+            <div>
+              <span class="eyebrow">Administration & Access Control</span>
+              <h1>User Access & Approvals</h1>
+              <p>Review new user registrations, grant workspace access, and manage user roles.</p>
+            </div>
+            <div class="admin-stats-strip">
+              <div class="admin-stat-item"><strong id="admin-count-pending">0</strong><span>Pending</span></div>
+              <div class="admin-stat-item"><strong id="admin-count-approved">0</strong><span>Approved</span></div>
+              <div class="admin-stat-item"><strong id="admin-count-total">0</strong><span>Total users</span></div>
+            </div>
+          </div>
+
+          <!-- Prominent Pending Requests Banner & Cards -->
+          <div class="pending-requests-banner" id="admin-pending-banner" hidden>
+            <div class="pending-banner-head">
+              <div class="pending-badge-icon">⏳</div>
+              <div>
+                <h3>Pending Access Requests (<span id="pending-banner-count">0</span>)</h3>
+                <p>Click any user card below or in the table to inspect details and grant instant access.</p>
+              </div>
+            </div>
+            <div class="pending-cards-grid" id="admin-pending-cards">
+              <!-- Rendered pending user cards -->
+            </div>
+          </div>
+
+          <div class="admin-control-bar">
+            <div class="admin-filter-tabs">
+              <button class="filter-tab active" data-admin-filter="all" type="button">All users</button>
+              <button class="filter-tab" data-admin-filter="pending" type="button">Pending approval <span class="badge-count" id="admin-badge-pending">0</span></button>
+              <button class="filter-tab" data-admin-filter="approved" type="button">Approved</button>
+              <button class="filter-tab" data-admin-filter="rejected" type="button">Rejected / Revoked</button>
+            </div>
+            <div class="admin-search-wrap">
+              <input type="search" id="admin-user-search" placeholder="Search by email or name…" aria-label="Search users">
+            </div>
+          </div>
+
+          <section class="panel admin-users-panel">
+            <div class="panel-head">
+              <div>
+                <span class="section-kicker">Member Directory</span>
+                <h2>Registered Accounts</h2>
+              </div>
+              <span class="admin-email-notice">Role: <strong>Super Administrator</strong></span>
+            </div>
+
+            <div class="table-container">
+              <table class="admin-users-table">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Registered</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th class="actions-col">Actions & Decision</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-users-tbody">
+                  <tr>
+                    <td colspan="6" class="table-empty">Loading user profiles...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
         </section>
       </main>
 
       <aside class="coach-panel" id="coach-panel" aria-label="AI research copilot">
-        <div class="coach-head">
-          <div class="coach-identity"><span class="ai-avatar">✦</span><div><strong>MarketMind Copilot</strong><span><i id="coach-status-dot"></i><span id="coach-status-text">Connecting</span></span></div></div>
-          <div class="coach-head-actions">
-            <button class="icon-button" id="clear-chat-button" type="button" title="Clear chat" aria-label="Clear chat">↺</button>
-            <button class="icon-button coach-close" id="close-coach-button" type="button" aria-label="Close AI copilot">×</button>
+        <div class="coach-minimized-strip" id="coach-minimized-strip" title="Expand MarketMind AI Copilot">
+          <button class="coach-strip-expand-btn" id="expand-coach-button" type="button" title="Expand AI Copilot" aria-label="Expand AI Copilot">
+            <span class="strip-expand-icon">⤢</span>
+          </button>
+          <div class="minimized-strip-title">
+            <span class="ai-avatar-mini">✦</span>
+            <span>AI Copilot</span>
+          </div>
+          <div class="minimized-status-indicator" title="AI Status">
+            <i class="coach-mini-dot" id="coach-mini-status-dot"></i>
           </div>
         </div>
 
-        <div class="coach-controls">
-          <label><span>Mode</span><select id="chat-mode"><option value="general">Research copilot</option><option value="ipo">IPO teardown</option><option value="tutor">Learning tutor</option><option value="risk">Risk reviewer</option></select></label>
-          <label><span>Company context</span><select id="chat-ipo-select"><option value="">No IPO selected</option></select></label>
+        <div class="coach-body-wrapper" id="coach-body-wrapper">
+          <div class="coach-head">
+            <div class="coach-identity"><span class="ai-avatar">✦</span><div><strong>MarketMind Copilot</strong><span><i id="coach-status-dot"></i><span id="coach-status-text">Connecting</span></span></div></div>
+            <div class="coach-head-actions">
+              <button class="coach-clear-btn" id="clear-chat-button" type="button" title="Clear chat history and reset conversation" aria-label="Clear chat conversation">
+                <span class="clear-icon">🗑</span>
+                <span>Clear Chat</span>
+              </button>
+              <button class="coach-minimize-btn" id="minimize-coach-button" type="button" title="Minimize AI chat" aria-label="Minimize AI chat">
+                <span class="minimize-icon" aria-hidden="true">—</span>
+              </button>
+              <button class="icon-button coach-close" id="close-coach-button" type="button" aria-label="Close AI copilot">×</button>
+            </div>
+          </div>
+
+          <div class="coach-controls">
+            <label><span>Mode</span><select id="chat-mode"><option value="general">Research copilot</option><option value="ipo">IPO teardown</option><option value="tutor">Learning tutor</option><option value="risk">Risk reviewer</option></select></label>
+            <label><span>Company context</span><select id="chat-ipo-select"><option value="">No IPO selected</option></select></label>
+          </div>
+
+          <div class="chat-messages" id="chat-messages" aria-live="polite"></div>
+
+          <div class="quick-prompts" id="quick-prompts">
+            <button type="button" data-prompt-action="teardown">✦ 20-Yr Analyst Deep Teardown</button>
+            <button type="button" data-prompt="Analyze this stock setup against Bharat Jhunjhunwala's 3-Indicator Swing Trading System: (1) Moving Average trend direction & contraction vs expansion phase, (2) ZigZag (dev 3, pivot 2) market structure for CHOCH / BOS & Higher Lows, (3) MACD histogram momentum confirmation above zero, (4) Exact Stop-Loss below ZigZag swing low / lower MA, and (5) 1:2 to 1:3+ RRR trade management with Breakeven shift and trailing runner.">Review 3-Indicator Swing Setup</button>
+            <button type="button" data-prompt="Give me a fast IPO due-diligence checklist for this company.">Due-diligence checklist</button>
+            <button type="button" data-prompt="What are the three biggest risks I should investigate first?">Find the red flags</button>
+            <button type="button" data-prompt="Explain the attached financials in plain language and flag weak cash conversion.">Read the financials</button>
+          </div>
+
+          <div class="attachment-tray" id="attachment-tray"></div>
+          <form class="composer" id="chat-form">
+            <label class="attach-button" title="Attach documents">＋<input id="attachment-input" type="file" multiple accept=".pdf,.txt,.csv,.json,.png,.jpg,.jpeg,.webp"></label>
+            <textarea id="chat-input" rows="1" maxlength="12000" placeholder="Ask about a company, filing, ratio, or chart…" aria-label="Message MarketMind Copilot"></textarea>
+            <button class="send-button" id="send-button" type="submit" aria-label="Send message">↑</button>
+          </form>
+          <p class="coach-disclaimer">AI can be wrong. Verify figures against primary filings before making decisions.</p>
         </div>
-
-        <div class="chat-messages" id="chat-messages" aria-live="polite"></div>
-
-        <div class="quick-prompts" id="quick-prompts">
-          <button type="button" data-prompt="Give me a fast IPO due-diligence checklist for this company.">Due-diligence checklist</button>
-          <button type="button" data-prompt="What are the three biggest risks I should investigate first?">Find the red flags</button>
-          <button type="button" data-prompt="Explain the attached financials in plain language and flag weak cash conversion.">Read the financials</button>
-        </div>
-
-        <div class="attachment-tray" id="attachment-tray"></div>
-        <form class="composer" id="chat-form">
-          <label class="attach-button" title="Attach documents">＋<input id="attachment-input" type="file" multiple accept=".pdf,.txt,.csv,.json,.png,.jpg,.jpeg,.webp"></label>
-          <textarea id="chat-input" rows="1" maxlength="12000" placeholder="Ask about a company, filing, ratio, or chart…" aria-label="Message MarketMind Copilot"></textarea>
-          <button class="send-button" id="send-button" type="submit" aria-label="Send message">↑</button>
-        </form>
-        <p class="coach-disclaimer">AI can be wrong. Verify figures against primary filings before making decisions.</p>
       </aside>
+      <button class="floating-coach-btn" id="floating-coach-button" type="button" aria-label="Open AI Copilot" title="Open AI Copilot">
+        <span class="floating-ai-icon">✦</span>
+        <span class="floating-coach-text">Ask AI</span>
+      </button>
       <div class="coach-scrim" id="coach-scrim"></div>
     </div>
   </div>
@@ -433,15 +557,121 @@
     <form class="modal-card" id="ipo-form">
       <div class="modal-head"><div><span class="section-kicker">Research queue</span><h2 id="ipo-modal-title">Add an IPO</h2></div><button class="icon-button" id="close-ipo-modal" type="button" aria-label="Close">×</button></div>
       <div class="modal-fields">
-        <label class="full"><span>Company name</span><input name="name" required maxlength="120" placeholder="e.g. Company Limited"></label>
+        <label class="full"><span>Company name</span><input name="name" required maxlength="120" placeholder="e.g. Purple Style Labs Limited"></label>
+        <label><span>Symbol / Ticker</span><input name="symbol" maxlength="20" placeholder="e.g. PURPLE"></label>
+        <label><span>Segment / Exchange</span>
+          <select name="exchange">
+            <option value="NSE / BSE · Mainboard">NSE / BSE · Mainboard</option>
+            <option value="NSE Emerge · SME">NSE Emerge · SME</option>
+            <option value="BSE SME · Emerge">BSE SME · Emerge</option>
+          </select>
+        </label>
         <label><span>Opens</span><input name="openDate" type="date" required></label>
         <label><span>Closes</span><input name="closeDate" type="date" required></label>
-        <label><span>Price band</span><input name="priceBand" maxlength="40" placeholder="₹100 – ₹110"></label>
-        <label><span>Lot size</span><input name="lotSize" inputmode="numeric" maxlength="20" placeholder="135 shares"></label>
+        <label><span>Price band</span><input name="priceBand" maxlength="40" placeholder="₹360 – ₹380"></label>
+        <label><span>Lot size</span><input name="lotSize" maxlength="30" placeholder="39 shares (₹14,820)"></label>
+        <label><span>GMP (Grey Market Premium)</span><input name="gmp" maxlength="40" placeholder="₹54 (14.2% gain)"></label>
+        <label><span>Subscription figure</span><input name="subscription" maxlength="30" placeholder="28.02×"></label>
+        <label><span>Shares offered</span><input name="sharesOffered" maxlength="40" placeholder="65,85,000 shares"></label>
+        <label><span>Total bids received</span><input name="bids" maxlength="40" placeholder="18,45,20,000 shares"></label>
+        <label class="full"><span>Parent / Promoter Group</span><input name="promoter" maxlength="120" placeholder="e.g. Promoters & Key Executives"></label>
         <label class="full"><span>RHP / official detail URL</span><input name="link" type="url" placeholder="https://..."></label>
+        <label class="full"><span>Initial research notes</span><textarea name="notes" rows="2" placeholder="Business model, growth drivers, key risks..."></textarea></label>
       </div>
       <div class="modal-actions"><button class="button secondary" id="cancel-ipo-modal" type="button">Cancel</button><button class="button primary" type="submit">Add to watchlist</button></div>
     </form>
+  </div>
+
+  <!-- Google Sheets & Online Data Sync Modal -->
+  <div class="modal-backdrop" id="ipo-sync-modal" role="dialog" aria-modal="true" aria-labelledby="ipo-sync-modal-title" hidden>
+    <div class="modal-card ipo-sync-modal-card">
+      <div class="modal-head">
+        <div>
+          <span class="section-kicker">Data Pipeline</span>
+          <h2 id="ipo-sync-modal-title">Sync with Google Sheets &amp; Online</h2>
+        </div>
+        <button class="icon-button" id="close-ipo-sync-modal" type="button" aria-label="Close">×</button>
+      </div>
+
+      <div class="sync-tabs">
+        <button class="sync-tab-btn active" id="tab-sheet-url" type="button">🔗 Google Sheets Link</button>
+        <button class="sync-tab-btn" id="tab-sheet-paste" type="button">📋 Paste Spreadsheet Rows</button>
+        <button class="sync-tab-btn" id="tab-sheet-upload" type="button">📁 Upload CSV / JSON</button>
+        <button class="sync-tab-btn" id="tab-sheet-export" type="button">💾 Export Data</button>
+      </div>
+
+      <!-- Tab 1: Google Sheet URL -->
+      <div class="sync-tab-content" id="content-sheet-url">
+        <p class="sync-description">
+          Paste any public Google Sheets link or direct CSV URL. The server converts it automatically and merges all columns (Company, Dates, Price Band, Lot Size, GMP, Subscriptions, Promoters).
+        </p>
+        <label class="sync-input-group">
+          <span>Google Sheets or CSV Web Link</span>
+          <input id="sync-sheet-url-input" type="url" placeholder="https://docs.google.com/spreadsheets/d/.../edit#gid=0" />
+        </label>
+        <div class="sync-url-hint">
+          <strong>Tip:</strong> In Google Sheets, click <em>File → Share → Publish to web (CSV)</em> or make the sheet viewable by <em>Anyone with the link</em>.
+        </div>
+        <div class="modal-actions">
+          <button class="button secondary" id="cancel-sync-url-btn" type="button">Cancel</button>
+          <button class="button primary" id="fetch-sheet-url-btn" type="button">Fetch &amp; Import Sheet</button>
+        </div>
+      </div>
+
+      <!-- Tab 2: Paste Rows from Google Sheets or Excel -->
+      <div class="sync-tab-content" id="content-sheet-paste" hidden>
+        <p class="sync-description">
+          Select and copy table rows directly from Google Sheets, Microsoft Excel, NSE, or Chittorgarh, then paste them below:
+        </p>
+        <label class="sync-input-group">
+          <span>Pasted Tab / Comma Separated Data</span>
+          <textarea id="sync-paste-textarea" rows="7" placeholder="Name	Open	Close	Price	Lot	GMP	Subscription
+Purple Style Labs	2026-08-20	2026-08-25	₹360 - ₹380	39	₹54	28.02x
+Priority Jewels	2026-08-21	2026-08-26	₹240 - ₹255	58	₹32	13.19x
+ESDS Software	2026-08-22	2026-08-27	₹160 - ₹175	85	₹28	13.26x
+Lumino Industries	2026-08-24	2026-08-28	₹285 - ₹300	50	₹18	0.68x
+Ashutosh Fibre	2026-08-25	2026-08-29	₹95 - ₹100	1200	₹14	0.42x
+Shanti Inorganics	2026-08-26	2026-08-30	₹72 - ₹76	1600	₹8	0.05x"></textarea>
+        </label>
+        <div class="modal-actions">
+          <button class="button secondary" id="cancel-sync-paste-btn" type="button">Cancel</button>
+          <button class="button primary" id="import-pasted-data-btn" type="button">Parse &amp; Import Rows</button>
+        </div>
+      </div>
+
+      <!-- Tab 3: Upload File -->
+      <div class="sync-tab-content" id="content-sheet-upload" hidden>
+        <p class="sync-description">
+          Upload a <code>.csv</code> or <code>.json</code> file exported from your spreadsheet or database.
+        </p>
+        <div class="file-drop-zone" id="file-drop-zone">
+          <span class="drop-icon">📂</span>
+          <strong>Drop CSV / JSON file here or click to browse</strong>
+          <small>Supports standard IPO watchlist formats with auto column-mapping</small>
+          <input id="sync-file-input" type="file" accept=".csv,.json,.txt" hidden />
+        </div>
+        <div id="file-upload-preview" class="file-upload-preview" hidden></div>
+        <div class="modal-actions">
+          <button class="button secondary" id="cancel-sync-file-btn" type="button">Cancel</button>
+          <button class="button primary" id="import-uploaded-file-btn" type="button" disabled>Import Selected File</button>
+        </div>
+      </div>
+
+      <!-- Tab 4: Export Data -->
+      <div class="sync-tab-content" id="content-sheet-export" hidden>
+        <p class="sync-description">
+          Download your active IPO watchlist and research notes as a standard CSV format that opens seamlessly in Google Sheets, Microsoft Excel, or Apple Numbers.
+        </p>
+        <div class="export-summary-box">
+          <div><strong>Tracked Issues:</strong> <span id="export-count-label">6 IPOs</span></div>
+          <div><strong>Fields:</strong> Name, Symbol, Exchange, Dates, Price Band, Lot Size, GMP, Subscription, Bids, Shares Offered, Promoter, Notes, Link</div>
+        </div>
+        <div class="modal-actions">
+          <button class="button secondary" id="close-export-tab-btn" type="button">Close</button>
+          <button class="button primary" id="download-csv-btn" type="button">⬇ Download CSV for Google Sheets</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="tour-layer" id="tour-layer" hidden>
@@ -462,6 +692,175 @@
       </div>
       <p class="tour-keyboard-hint">Use ← → to move · Esc to close</p>
     </section>
+  </div>
+
+  <!-- Auth Modal (Sign In / Register) -->
+  <div class="modal-backdrop" id="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" hidden>
+    <div class="modal-card auth-modal-card">
+      <div class="modal-head">
+        <div>
+          <span class="section-kicker">MarketMind Account</span>
+          <h2 id="auth-modal-title">Sign in to workspace</h2>
+        </div>
+        <button class="icon-button" id="close-auth-modal" type="button" aria-label="Close">×</button>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" id="tab-login-btn" type="button">Sign In</button>
+        <button class="auth-tab-btn" id="tab-register-btn" type="button">Create Account</button>
+      </div>
+
+      <div class="auth-social-wrap">
+        <button class="google-sign-in-btn" id="google-auth-btn" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Continue with Google</span>
+        </button>
+      </div>
+
+      <div class="auth-divider"><span>or with email</span></div>
+
+      <form id="auth-form" class="auth-form-fields">
+        <div id="auth-name-field" hidden>
+          <label><span>Your Name</span><input id="auth-display-name" type="text" maxlength="60" placeholder="John Trader"></label>
+        </div>
+        <label><span>Email Address</span><input id="auth-email" type="email" required autocomplete="email" placeholder="name@example.com"></label>
+        <label><span>Password</span><input id="auth-password" type="password" required minlength="6" autocomplete="current-password" placeholder="••••••••"></label>
+
+        <div class="auth-error-msg" id="auth-error" hidden></div>
+
+        <div class="modal-actions">
+          <button class="button primary full-width" id="auth-submit-btn" type="submit">Sign In</button>
+        </div>
+      </form>
+
+      <p class="auth-note">New registrations require workspace administrator approval before accessing research tools.</p>
+    </div>
+  </div>
+
+  <!-- Account Details Modal -->
+  <div class="modal-backdrop" id="account-modal" role="dialog" aria-modal="true" aria-labelledby="account-modal-title" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <span class="section-kicker">User Session</span>
+          <h2 id="account-modal-title">My Account</h2>
+        </div>
+        <button class="icon-button" id="close-account-modal" type="button" aria-label="Close">×</button>
+      </div>
+      <div class="account-summary-card">
+        <div class="account-avatar-large" id="acc-avatar">👤</div>
+        <div class="account-info-lines">
+          <strong id="acc-name">Loading...</strong>
+          <span id="acc-email">loading...</span>
+          <div class="account-status-badges">
+            <span class="status-badge" id="acc-status-badge">Pending</span>
+            <span class="role-badge" id="acc-role-badge">Member</span>
+          </div>
+        </div>
+      </div>
+      <div class="account-actions-row">
+        <button class="button secondary" id="admin-shortcut-btn" type="button" hidden>Open Admin Portal</button>
+        <button class="button danger" id="logout-btn" type="button">Sign Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Access Request Details Inspector Modal -->
+  <div class="modal-backdrop" id="request-detail-modal" role="dialog" aria-modal="true" aria-labelledby="req-modal-title" hidden>
+    <div class="modal-card req-modal-card">
+      <div class="modal-head">
+        <div>
+          <span class="section-kicker">Access Request Inspector</span>
+          <h2 id="req-modal-title">Review User Request</h2>
+        </div>
+        <button class="icon-button" id="close-req-modal" type="button" aria-label="Close">×</button>
+      </div>
+
+      <div class="req-detail-body">
+        <div class="req-user-header">
+          <div class="req-avatar" id="req-modal-avatar">👤</div>
+          <div class="req-user-meta">
+            <h3 id="req-modal-name">User Name</h3>
+            <span id="req-modal-email">user@example.com</span>
+            <div class="req-tags-row">
+              <span class="status-badge" id="req-modal-status">PENDING</span>
+              <span class="role-badge" id="req-modal-role">MEMBER</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="req-data-table">
+          <div class="req-data-row">
+            <span>User ID (UID)</span>
+            <code id="req-modal-uid">—</code>
+          </div>
+          <div class="req-data-row">
+            <span>Registered On</span>
+            <span id="req-modal-time">—</span>
+          </div>
+          <div class="req-data-row">
+            <span>Time Elapsed</span>
+            <span id="req-modal-elapsed">—</span>
+          </div>
+          <div class="req-data-row">
+            <span>Approval History</span>
+            <span id="req-modal-approvedby">—</span>
+          </div>
+        </div>
+
+        <div class="req-modal-actions">
+          <button class="button primary full-width" id="req-modal-approve-btn" type="button">✓ Approve Access Now</button>
+          <button class="button danger full-width" id="req-modal-reject-btn" type="button">✕ Reject / Revoke Access</button>
+          <button class="button secondary full-width" id="req-modal-role-btn" type="button">Toggle Role (Admin / Member)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mandatory Authentication & Approval Gate Overlay -->
+  <div class="approval-gate-overlay" id="approval-gate">
+    <div class="approval-gate-card">
+      <div class="gate-icon" id="gate-icon">🔐</div>
+      <span class="section-kicker" id="gate-kicker">Authentication Required</span>
+      <h2 id="gate-title">Sign In to MarketMind</h2>
+      <p id="gate-description">
+        Please sign in with Google or your email account to access the MarketMind options strategy simulator, IPO watch, and AI research desk.
+      </p>
+      <div class="gate-status-pill" id="gate-status-pill" hidden>
+        <span class="pulse-dot"></span> Status: <span id="gate-status-text">Pending Admin Approval</span>
+      </div>
+
+      <div class="gate-actions-stack">
+        <!-- Buttons shown when not signed in -->
+        <div id="gate-unauth-actions" class="gate-actions-stack">
+          <button class="button primary full-width social-auth-btn" id="gate-google-btn" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+            </svg>
+            <span>Continue with Google</span>
+          </button>
+          <button class="button secondary full-width" id="gate-email-login-btn" type="button">✉️ Sign In / Register with Email</button>
+          <button class="button subtle full-width" id="gate-admin-login-btn" type="button" style="border:1px solid rgba(200,240,93,0.3);color:var(--lime);">👑 Administrator Portal Sign-In</button>
+        </div>
+
+        <!-- Buttons shown when signed in but pending approval -->
+        <div id="gate-pending-actions" class="gate-actions-stack" hidden>
+          <div class="gate-actions-row">
+            <button class="button secondary" id="gate-logout-btn" type="button">🚪 Sign Out</button>
+            <button class="button secondary" id="gate-check-status-btn" type="button">🔄 Refresh Status</button>
+          </div>
+          <button class="button subtle full-width" id="gate-switch-admin-btn" type="button" style="border:1px solid rgba(200,240,93,0.3);color:var(--lime);">👑 Switch to Admin Account</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

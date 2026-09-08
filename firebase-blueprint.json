@@ -1,0 +1,20 @@
+{
+  "entities": {
+    "users": {
+      "description": "User profiles, roles, and approval status for accessing MarketMind",
+      "fields": {
+        "email": { "type": "string", "description": "User email address" },
+        "displayName": { "type": "string", "description": "User display name" },
+        "photoURL": { "type": "string", "description": "Avatar URL" },
+        "role": { "type": "string", "description": "Role: 'admin' or 'member'" },
+        "status": { "type": "string", "description": "Approval status: 'pending', 'approved', 'rejected'" },
+        "createdAt": { "type": "string", "description": "ISO timestamp of account creation" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp of last update" },
+        "approvedAt": { "type": "string", "description": "ISO timestamp when approved" },
+        "approvedBy": { "type": "string", "description": "Email or UID of admin who approved" }
+      }
+    }
+  }
+}
+
+

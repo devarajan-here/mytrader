@@ -72,6 +72,39 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  if (req.method === 'POST' && req.url === '/api/ipos/sync-sheet') {
+    try {
+      const body = await readJson(req, 2 * 1024 * 1024);
+      const rawUrl = String(body.url || '').trim();
+      if (!rawUrl) return sendJson(res, 400, { error: 'A Google Sheets or CSV URL is required.' });
+
+      const requestedUrl = new URL(rawUrl);
+      if (!['https:', 'http:'].includes(requestedUrl.protocol) || isPrivateHostname(requestedUrl.hostname)) {
+        return sendJson(res, 400, { error: 'Only public HTTP(S) Google Sheets or CSV links are supported.' });
+      }
+
+      let exportUrl = requestedUrl.toString();
+      const googleSheet = requestedUrl.pathname.match(/^\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+      if (requestedUrl.hostname === 'docs.google.com' && googleSheet) {
+        const gid = requestedUrl.searchParams.get('gid') || requestedUrl.hash.match(/gid=([0-9]+)/)?.[1] || '0';
+        exportUrl = `https://docs.google.com/spreadsheets/d/${googleSheet[1]}/export?format=csv&gid=${gid}`;
+      }
+
+      const response = await fetch(exportUrl, {
+        headers: { Accept: 'text/csv,text/plain,application/json;q=0.8,*/*;q=0.2', 'User-Agent': 'MarketMind/1.0' },
+        signal: AbortSignal.timeout(15_000),
+        redirect: 'follow',
+      });
+      if (!response.ok) throw new Error(`The data source returned HTTP ${response.status}. Make sure it is public.`);
+      const csv = await response.text();
+      if (Buffer.byteLength(csv) > 5 * 1024 * 1024) throw new Error('The imported data exceeds the 5 MB limit.');
+      return sendJson(res, 200, { ok: true, csv, sourceUrl: exportUrl, fetchedAt: new Date().toISOString() });
+    } catch (error) {
+      const status = error instanceof TypeError ? 400 : 502;
+      return sendJson(res, status, { error: error.message || 'Could not fetch that sheet or CSV file.' });
+    }
+  }
+
   if (req.method === 'GET' && req.url?.startsWith('/api/market/nifty-options')) {
     const url = new URL(req.url, 'http://127.0.0.1');
     const force = url.searchParams.get('refresh') === '1';
@@ -486,7 +519,15 @@ function setSecurityHeaders(res) {
   res.setHeader('Referrer-Policy', 'no-referrer');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data: https://*.tradingview.com https://*.tvcdn.io; style-src 'self' 'unsafe-inline' https://*.tradingview.com; script-src 'self' https://s3.tradingview.com https://*.tradingview.com 'unsafe-inline'; frame-src https://*.tradingview.com; connect-src 'self' https://*.tradingview.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
+  res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data: https://*.tradingview.com https://*.tvcdn.io https://*.googleusercontent.com; style-src 'self' 'unsafe-inline' https://*.tradingview.com; script-src 'self' 'unsafe-inline' https://s3.tradingview.com https://*.tradingview.com https://www.gstatic.com; frame-src https://*.tradingview.com https://accounts.google.com https://*.firebaseapp.com; connect-src 'self' https://*.tradingview.com https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
+}
+
+function isPrivateHostname(hostname) {
+  const host = String(hostname || '').toLowerCase().replace(/^\[|\]$/g, '');
+  if (host === 'localhost' || host.endsWith('.localhost') || host === '::1' || host === '0.0.0.0') return true;
+  if (/^127\./.test(host) || /^10\./.test(host) || /^192\.168\./.test(host) || /^169\.254\./.test(host)) return true;
+  const match = host.match(/^172\.(\d{1,3})\./);
+  return Boolean(match && Number(match[1]) >= 16 && Number(match[1]) <= 31);
 }
 
 function sendJson(res, status, body) {

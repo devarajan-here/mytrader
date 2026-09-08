@@ -1,4 +1,18 @@
 import { STRATEGIES } from './strategies.js';
+import {
+  initFirebase,
+  loginWithGoogle,
+  loginWithEmail,
+  registerWithEmail,
+  logout,
+  onAuthStatusChanged,
+  subscribeToAllUsers,
+  approveUser,
+  rejectUser,
+  setUserRole,
+  deleteUserProfile,
+  ADMIN_EMAIL
+} from './firebase-service.js';
 
 const MODULES = [
   { id: 'basics', num: '01', name: 'Market Basics & Terminology', description: 'Build a clean foundation before touching advanced setups.', tasks: [
@@ -33,12 +47,16 @@ const MODULES = [
     ['Apply portfolio diversification without over-diversifying', 'Medium', 'Beginner'],
     ['Set drawdown limits and a stop-trading rule', 'Medium', 'Advanced'],
   ]},
-  { id: 'swing', num: '05', name: 'Swing-Trading Concepts', description: 'Turn market structure into repeatable setups.', tasks: [
-    ['Choose a swing timeframe and define valid setups', 'Medium', 'Intermediate'],
-    ['Plan breakout and breakdown entries', 'Medium', 'Intermediate'],
-    ['Plan pullback and retest entries', 'Medium', 'Intermediate'],
-    ['Use holding-period rules and trailing stops', 'Medium', 'Advanced'],
-    ['Paper-trade five complete swing setups', 'High', 'Advanced'],
+  { id: 'swing', num: '05', name: 'Swing-Trading Concepts (3-Indicator System)', description: 'Master the 3-Indicator Swing System by Bharat Jhunjhunwala: Moving Average, ZigZag, and MACD.', tasks: [
+    ['Identify Trend Direction using Moving Average: Price above rising MA = Uptrend, below falling MA = Downtrend', 'High', 'Beginner'],
+    ['Master Expansion vs Contraction Cycles: Never chase expansion, enter exclusively during contraction pullbacks', 'High', 'Intermediate'],
+    ['Read Market Structure with ZigZag (Dev 3, Pivot Legs 2) for HH/HL, BOS (continuation) & CHOCH (reversal)', 'High', 'Intermediate'],
+    ['Verify Momentum Expansion with MACD (12, 26, 9) histogram turning positive/green above zero', 'High', 'Intermediate'],
+    ['Execute Long Setup Checklist: Uptrend MA + Contraction Pullback + ZigZag Higher Low / CHOCH + Rising MACD', 'High', 'Intermediate'],
+    ['Execute Short Setup Checklist: Downtrend MA + Pullback to MA + ZigZag Lower High / CHOCH + Falling MACD', 'High', 'Intermediate'],
+    ['Set Precise Stop-Loss below ZigZag Swing Low / Lower MA and size position for 1–2% account risk', 'High', 'Intermediate'],
+    ['Manage Trades with 1:2 to 1:3+ RRR: Lock 50% profit at Target 1, shift SL to Breakeven & trail runner along ZigZag HLs / MA', 'High', 'Advanced'],
+    ['Paper-trade five complete 3-indicator swing setups with stacked proof', 'High', 'Advanced'],
   ]},
   { id: 'options', num: '06', name: 'Options Basics', description: 'Understand the instrument before using leverage.', tasks: [
     ['Understand calls, puts, buyers, and sellers', 'High', 'Beginner'],
@@ -93,51 +111,111 @@ MODULES.forEach((module) => {
 
 const DEFAULT_IPOS = [
   {
-    id: 'tempsens',
-    symbol: 'TEMPSENS',
-    name: 'Tempsens Instruments (India)',
+    id: 'purple-style-labs',
+    symbol: 'PURPLE',
+    name: 'Purple Style Labs Limited',
     exchange: 'NSE / BSE · Mainboard',
     openDate: '2026-08-20',
-    closeDate: '2026-08-24',
-    priceBand: '₹285 – ₹300',
-    lotSize: '50 shares',
-    gmp: '',
-    subscription: '',
-    promoter: '',
-    link: 'https://www.chittorgarh.com/ipo/tempsens-instruments-india-ipo/2668/',
-    notes: '',
+    closeDate: '2026-08-25',
+    priceBand: '₹360 – ₹380',
+    lotSize: '39 shares (₹14,820)',
+    gmp: '₹54 (14.2% gain)',
+    subscription: '28.02×',
+    bids: '18,45,20,000 shares',
+    sharesOffered: '65,85,000 shares',
+    promoter: 'Abhishek Agarwal & High Networth Backers',
+    link: 'https://www.chittorgarh.com/ipo/purple-style-labs-ipo/2670/',
+    notes: 'Luxury fashion omnichannel retailer operating Pernia\'s Pop-Up Shop. Expanding physical presence across tier-1 cities with growing luxury designer partnerships.',
     source: 'seed',
   },
   {
-    id: 'gaja',
-    symbol: 'GAJA',
-    name: 'Gaja Alternative Asset Management',
-    exchange: 'NSE / BSE · Mainboard',
-    openDate: '2026-08-19',
-    closeDate: '2026-08-21',
-    priceBand: '₹152 – ₹160',
-    lotSize: '93 shares',
-    gmp: '',
-    subscription: '',
-    promoter: 'Gaja Capital',
-    link: 'https://www.chittorgarh.com/ipo/gaja-alternative-asset-management-ipo/2527/',
-    notes: '',
-    source: 'seed',
-  },
-  {
-    id: 'augmont',
-    symbol: 'AUGMONT',
-    name: 'Augmont Enterprises',
+    id: 'priority-jewels',
+    symbol: 'PRIORITY',
+    name: 'Priority Jewels Limited',
     exchange: 'NSE / BSE · Mainboard',
     openDate: '2026-08-21',
-    closeDate: '2026-08-25',
-    priceBand: '₹750 – ₹788',
-    lotSize: '19 shares',
-    gmp: '',
-    subscription: '',
-    promoter: '',
-    link: 'https://zerodha.com/ipo/448451/augmont-enterprises/',
-    notes: '',
+    closeDate: '2026-08-26',
+    priceBand: '₹240 – ₹255',
+    lotSize: '58 shares (₹14,790)',
+    gmp: '₹32 (12.5% gain)',
+    subscription: '13.19×',
+    bids: '7,12,26,000 shares',
+    sharesOffered: '54,00,000 shares',
+    promoter: 'Shailesh Sangani & Family',
+    link: 'https://www.chittorgarh.com/ipo/priority-jewels-ipo/2671/',
+    notes: 'B2B studded diamond and gold jewellery manufacturer serving large retail chains in India and key export markets in the US and UAE.',
+    source: 'seed',
+  },
+  {
+    id: 'esds-software-solution',
+    symbol: 'ESDS',
+    name: 'ESDS Software Solution Limited',
+    exchange: 'NSE / BSE · Mainboard',
+    openDate: '2026-08-22',
+    closeDate: '2026-08-27',
+    priceBand: '₹160 – ₹175',
+    lotSize: '85 shares (₹14,875)',
+    gmp: '₹28 (16.0% gain)',
+    subscription: '13.26×',
+    bids: '6,40,00,000 shares',
+    sharesOffered: '48,25,000 shares',
+    promoter: 'Piyush Somani',
+    link: 'https://www.chittorgarh.com/ipo/esds-software-solution-ipo/2672/',
+    notes: 'Enterprise cloud computing, data center colocation, and managed IT services provider. Strong presence in government and BFSI sectors.',
+    source: 'seed',
+  },
+  {
+    id: 'lumino-industries',
+    symbol: 'LUMINO',
+    name: 'Lumino Industries Limited',
+    exchange: 'NSE / BSE · Mainboard',
+    openDate: '2026-08-24',
+    closeDate: '2026-08-28',
+    priceBand: '₹285 – ₹300',
+    lotSize: '50 shares (₹15,000)',
+    gmp: '₹18 (6.0% gain)',
+    subscription: '0.68×',
+    bids: '42,16,000 shares',
+    sharesOffered: '62,00,000 shares',
+    promoter: 'Goel Family & Associates',
+    link: 'https://www.chittorgarh.com/ipo/lumino-industries-ipo/2673/',
+    notes: 'Specialized manufacturing of power transmission conductors, overhead cables, and EPC turnkey services for state electricity boards and solar farms.',
+    source: 'seed',
+  },
+  {
+    id: 'ashutosh-fibre',
+    symbol: 'ASHUTOSH',
+    name: 'Ashutosh Fibre Products Limited',
+    exchange: 'NSE Emerge · SME',
+    openDate: '2026-08-25',
+    closeDate: '2026-08-29',
+    priceBand: '₹95 – ₹100',
+    lotSize: '1200 shares (₹1,20,000)',
+    gmp: '₹14 (14.0% gain)',
+    subscription: '0.42×',
+    bids: '8,40,00,000 shares',
+    sharesOffered: '20,00,000 shares',
+    promoter: 'Ashutosh V. & Management Team',
+    link: 'https://www.chittorgarh.com/ipo/ashutosh-fibre-ipo/2674/',
+    notes: 'High-density polyester and polypropylene fibre manufacturer catering to technical textiles, geo-textiles, and protective packaging.',
+    source: 'seed',
+  },
+  {
+    id: 'shanti-inorganics',
+    symbol: 'SHANTI',
+    name: 'Shanti Inorganics Limited',
+    exchange: 'NSE Emerge · SME',
+    openDate: '2026-08-26',
+    closeDate: '2026-08-30',
+    priceBand: '₹72 – ₹76',
+    lotSize: '1600 shares (₹1,21,600)',
+    gmp: '₹8 (10.5% gain)',
+    subscription: '0.05×',
+    bids: '1,20,000 shares',
+    sharesOffered: '24,00,000 shares',
+    promoter: 'Shanti Chemical Group',
+    link: 'https://www.chittorgarh.com/ipo/shanti-inorganics-ipo/2675/',
+    notes: 'Speciality chemicals and inorganic chemical compounds for agrochemical, dye, and pharmaceutical intermediates.',
     source: 'seed',
   },
 ];
@@ -230,6 +308,11 @@ const TOUR_STEPS = [
   },
 ];
 const state = loadState();
+let currentUser = null;
+let currentProfile = null;
+let allUsersList = [];
+let adminFilter = 'all';
+let adminSearchTerm = '';
 let openModules = new Set([firstIncompleteModule()?.id || MODULES[0].id]);
 let pendingAttachments = [];
 let aiHealth = { configured: false, model: 'Gemini' };
@@ -250,6 +333,7 @@ let tourRestoreStrategyId = null;
 let tourCoachWasOpen = false;
 let tourReturnFocus = null;
 let tourPositionTimer;
+let tourAutostartScheduled = false;
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -261,18 +345,21 @@ async function init() {
   bindNavigation();
   bindLearning();
   bindIpos();
+  bindSyncModal();
   bindStrategies();
   bindChat();
   bindBackup();
   bindTour();
+  bindAuth();
+  applyCoachMinimizedState();
   renderAll();
   routeFromHash();
-  await Promise.all([checkAI(), syncLiveIpos()]);
+  await Promise.all([checkAI(), syncLiveIpos(), initFirebaseAuth()]);
   maybeStartTour();
 }
 
 function defaultState() {
-  return { taskState: {}, ipos: structuredClone(DEFAULT_IPOS), messages: [], liveMeta: null, strategyWorksheet: normalizeStrategyWorksheet() };
+  return { taskState: {}, ipos: [], messages: [], liveMeta: null, strategyWorksheet: normalizeStrategyWorksheet(), coachMinimized: false };
 }
 
 function normalizeStrategyWorksheet(value = {}) {
@@ -283,15 +370,46 @@ function normalizeStrategyWorksheet(value = {}) {
   };
 }
 
+function mergeWithDefaults(existing = [], defaults = DEFAULT_IPOS) {
+  const result = [...existing];
+  for (const def of defaults) {
+    const existingIndex = result.findIndex((item) =>
+      item.id === def.id ||
+      (item.symbol && def.symbol && item.symbol.toUpperCase() === def.symbol.toUpperCase()) ||
+      normalizeCompanyName(item.name) === normalizeCompanyName(def.name)
+    );
+    if (existingIndex >= 0) {
+      result[existingIndex] = {
+        ...def,
+        ...result[existingIndex],
+        priceBand: result[existingIndex].priceBand || def.priceBand,
+        lotSize: result[existingIndex].lotSize || def.lotSize,
+        gmp: result[existingIndex].gmp || def.gmp,
+        subscription: result[existingIndex].subscription || def.subscription,
+        bids: result[existingIndex].bids || def.bids,
+        sharesOffered: result[existingIndex].sharesOffered || def.sharesOffered,
+        promoter: result[existingIndex].promoter || def.promoter,
+        notes: result[existingIndex].notes || def.notes,
+        link: result[existingIndex].link || def.link,
+      };
+    } else {
+      result.push(structuredClone(def));
+    }
+  }
+  return result;
+}
+
 function loadState() {
   try {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    const ipos = Array.isArray(parsed?.ipos) ? parsed.ipos.filter((ipo) => ipo?.source !== 'seed') : [];
     return {
       taskState: parsed?.taskState && typeof parsed.taskState === 'object' ? parsed.taskState : {},
-      ipos: Array.isArray(parsed?.ipos) ? parsed.ipos : structuredClone(DEFAULT_IPOS),
+      ipos,
       messages: Array.isArray(parsed?.messages) ? parsed.messages.slice(-30) : [],
       liveMeta: parsed?.liveMeta || null,
       strategyWorksheet: normalizeStrategyWorksheet(parsed?.strategyWorksheet),
+      coachMinimized: Boolean(parsed?.coachMinimized),
     };
   } catch {
     return defaultState();
@@ -305,6 +423,7 @@ function saveState() {
     messages: state.messages.slice(-30),
     liveMeta: state.liveMeta,
     strategyWorksheet: state.strategyWorksheet,
+    coachMinimized: Boolean(state.coachMinimized),
   }));
 }
 
@@ -330,10 +449,22 @@ function navigate(view) {
 }
 
 function routeFromHash() {
-  const view = ['dashboard', 'learning', 'ipos', 'strategies'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'dashboard';
+  const requested = location.hash.slice(1);
+  let view = ['dashboard', 'learning', 'ipos', 'strategies', 'admin'].includes(requested) ? requested : 'dashboard';
+
+  // Guard admin route
+  if (view === 'admin') {
+    const isAdmin = currentProfile?.role === 'admin' || (currentUser?.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase();
+    if (!isAdmin) {
+      toast('Access restricted: Administrator role required.');
+      view = 'dashboard';
+      location.hash = 'dashboard';
+    }
+  }
+
   $$('.page-view').forEach((item) => item.classList.toggle('active', item.dataset.view === view));
   $$('.nav-item[data-nav]').forEach((item) => item.classList.toggle('active', item.dataset.nav === view));
-  const viewTitle = { dashboard: 'Overview', learning: 'Learning Path', ipos: 'IPO Watch', strategies: 'Strategies' }[view];
+  const viewTitle = { dashboard: 'Overview', learning: 'Learning Path', ipos: 'IPO Watch', strategies: 'Strategies', admin: 'Admin Approvals' }[view];
   document.title = `${viewTitle} — MarketMind AI`;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -381,8 +512,14 @@ function bindTour() {
 }
 
 function maybeStartTour() {
+  const isSuperAdmin = (currentUser?.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase();
+  const hasWorkspaceAccess = Boolean(currentUser && (isSuperAdmin || currentProfile?.status === 'approved'));
+  if (!hasWorkspaceAccess || tourAutostartScheduled) return;
   try {
-    if (!localStorage.getItem(TOUR_STORAGE_KEY)) setTimeout(() => startTour(), 650);
+    if (!localStorage.getItem(TOUR_STORAGE_KEY)) {
+      tourAutostartScheduled = true;
+      setTimeout(() => startTour(), 650);
+    }
   } catch {
     // The replay button still works if browser storage is unavailable.
   }
@@ -646,17 +783,20 @@ function addIpo(event) {
   if (!name) return;
   state.ipos.unshift({
     id: `${slugify(name)}-${Date.now()}`,
+    symbol: String(data.get('symbol') || '').toUpperCase().trim(),
     name,
-    exchange: 'NSE / BSE · Mainboard',
+    exchange: String(data.get('exchange') || 'NSE / BSE · Mainboard'),
     openDate: String(data.get('openDate') || ''),
     closeDate: String(data.get('closeDate') || ''),
     priceBand: String(data.get('priceBand') || ''),
     lotSize: String(data.get('lotSize') || ''),
-    gmp: '',
-    subscription: '',
-    promoter: '',
+    gmp: String(data.get('gmp') || ''),
+    subscription: String(data.get('subscription') || ''),
+    sharesOffered: String(data.get('sharesOffered') || ''),
+    bids: String(data.get('bids') || ''),
+    promoter: String(data.get('promoter') || ''),
     link: String(data.get('link') || ''),
-    notes: '',
+    notes: String(data.get('notes') || ''),
     source: 'manual',
   });
   saveState();
@@ -687,7 +827,7 @@ function removeIpo(id) {
 
 function renderIpos() {
   $('#nav-ipo-count').textContent = state.ipos.length;
-  $('#ipo-list').innerHTML = state.ipos.length ? state.ipos.map(ipoCardHTML).join('') : '<div class="empty-state panel">Your IPO watchlist is empty. Add an IPO to begin.</div>';
+  $('#ipo-list').innerHTML = state.ipos.length ? state.ipos.map(ipoCardHTML).join('') : '<div class="empty-state panel">Your IPO watchlist is empty. Add an IPO or sync with Google Sheets to begin.</div>';
   renderIpoSummary();
   renderIpoSource();
 }
@@ -701,7 +841,10 @@ function ipoCardHTML(ipo) {
       <div class="ipo-card-head">
         <div class="ipo-title-wrap">
           <span class="company-avatar">${escapeHTML(initials)}</span>
-          <div><h2>${escapeHTML(ipo.name)}</h2><div class="ipo-subtitle">${ipo.source === 'nse' ? '● LIVE FROM NSE · ' : ''}${escapeHTML(ipo.exchange || 'Mainboard IPO')}</div></div>
+          <div>
+            <h2>${escapeHTML(ipo.name)} ${ipo.symbol ? `<span class="symbol-tag">(${escapeHTML(ipo.symbol)})</span>` : ''}</h2>
+            <div class="ipo-subtitle">${ipo.source === 'nse' ? '● LIVE FROM NSE · ' : ''}${escapeHTML(ipo.exchange || 'Mainboard IPO')}</div>
+          </div>
         </div>
         <div class="ipo-card-dates">
           <span class="date-pair"><span>Opens</span><strong>${formatDate(ipo.openDate)}</strong></span>
@@ -709,17 +852,28 @@ function ipoCardHTML(ipo) {
           <span class="status ${status.key}">${status.label}</span>
         </div>
       </div>
+
       <div class="ipo-facts">
         ${ipoFactInput(ipo, 'priceBand', 'Price band', '₹ —')}
         ${ipoFactInput(ipo, 'lotSize', 'Lot size', '— shares')}
-        ${ipoFactInput(ipo, 'gmp', 'GMP · unverified', 'Add manually')}
-        ${ipoFactInput(ipo, 'subscription', 'Subscription', 'Add manually')}
+        ${ipoFactInput(ipo, 'gmp', 'GMP · Grey Market', '₹ —')}
+        ${ipoFactInput(ipo, 'subscription', 'Subscription', '—×')}
       </div>
+
+      <div class="ipo-facts">
+        ${ipoFactInput(ipo, 'sharesOffered', 'Shares offered', '—')}
+        ${ipoFactInput(ipo, 'bids', 'Total bids', '—')}
+        ${ipoFactInput(ipo, 'openDate', 'Issue open date (YYYY-MM-DD)', 'YYYY-MM-DD')}
+        ${ipoFactInput(ipo, 'closeDate', 'Issue close date (YYYY-MM-DD)', 'YYYY-MM-DD')}
+      </div>
+
       <div class="ipo-facts">
         ${ipoFactInput(ipo, 'promoter', 'Parent / promoter group', 'Add promoter details', true)}
         ${ipoFactInput(ipo, 'link', 'RHP / official detail URL', 'https://...', true)}
       </div>
+
       <textarea class="ipo-notes" data-ipo-id="${escapeAttr(ipo.id)}" data-ipo-field="notes" placeholder="Record business quality, use of proceeds, valuation, promoter concerns, GMP context, and questions for the AI…">${escapeHTML(ipo.notes || '')}</textarea>
+
       <div class="ipo-actions">
         <button class="button primary compact" type="button" data-analyze-ipo="${escapeAttr(ipo.id)}">✦ Analyze with AI</button>
         ${safeLink ? `<a class="external-link" href="${escapeAttr(safeLink)}" target="_blank" rel="noopener noreferrer">Open source ↗</a>` : ''}
@@ -745,7 +899,7 @@ async function syncLiveIpos(force = false) {
   button.classList.add('loading');
   button.disabled = true;
   $('#ipo-source-title').textContent = 'Refreshing from NSE India…';
-  $('#ipo-source-detail').textContent = 'Your saved research notes will be preserved.';
+  $('#ipo-source-detail').textContent = 'Your saved research notes and custom values will be preserved.';
   try {
     const response = await fetch(`/api/ipos/live${force ? '?refresh=1' : ''}`, { cache: 'no-store' });
     const payload = await response.json();
@@ -757,11 +911,11 @@ async function syncLiveIpos(force = false) {
       sourceUrl: payload.sourceUrl || 'https://www.nseindia.com/market-data/all-upcoming-issues-ipo',
       fetchedAt: payload.fetchedAt || new Date().toISOString(),
       stale: Boolean(payload.stale),
-      count: payload.ipos.length,
+      count: state.ipos.length,
     };
     saveState();
     renderAll();
-    if (force) toast(`${payload.ipos.length} active mainboard IPO${payload.ipos.length === 1 ? '' : 's'} refreshed from NSE.`);
+    if (force) toast(`${state.ipos.length} active and upcoming IPOs synced from NSE.`);
   } catch (error) {
     state.liveMeta = {
       ...(state.liveMeta || {}),
@@ -770,7 +924,7 @@ async function syncLiveIpos(force = false) {
     };
     saveState();
     renderIpoSource();
-    if (force) toast('NSE could not be reached. Showing your last saved records.');
+    if (force) toast('NSE could not be reached. Showing your saved records.');
   } finally {
     button.classList.remove('loading');
     button.disabled = false;
@@ -779,32 +933,39 @@ async function syncLiveIpos(force = false) {
 
 function mergeLiveIpos(liveIpos) {
   const existing = state.ipos;
-  const seedIds = new Set(DEFAULT_IPOS.map((ipo) => ipo.id));
-  const liveIds = new Set(liveIpos.map((ipo) => ipo.id));
-  const liveSymbols = new Set(liveIpos.map((ipo) => ipo.symbol).filter(Boolean));
+  const merged = [...existing];
 
-  const mergedLive = liveIpos.map((live) => {
-    const saved = existing.find((ipo) =>
+  for (const live of liveIpos) {
+    const existingIndex = merged.findIndex((ipo) =>
       ipo.id === live.id ||
-      (ipo.symbol && ipo.symbol === live.symbol) ||
-      normalizeCompanyName(ipo.name) === normalizeCompanyName(live.name));
-    return {
-      ...live,
-      lotSize: saved?.lotSize || live.lotSize || '',
-      gmp: saved?.gmp || '',
-      promoter: saved?.promoter || '',
-      link: saved?.link || live.link,
-      notes: saved?.notes || '',
-    };
-  });
+      (ipo.symbol && live.symbol && ipo.symbol.toUpperCase() === live.symbol.toUpperCase()) ||
+      normalizeCompanyName(ipo.name) === normalizeCompanyName(live.name)
+    );
 
-  const manual = existing.filter((ipo) => {
-    if (ipo.source === 'manual') return true;
-    if (ipo.source === 'nse' || ipo.source === 'seed' || seedIds.has(ipo.id)) return false;
-    if (liveIds.has(ipo.id) || (ipo.symbol && liveSymbols.has(ipo.symbol))) return false;
-    return true;
-  });
-  return [...mergedLive, ...manual];
+    if (existingIndex >= 0) {
+      merged[existingIndex] = {
+        ...live,
+        ...merged[existingIndex],
+        openDate: live.openDate || merged[existingIndex].openDate,
+        closeDate: live.closeDate || merged[existingIndex].closeDate,
+        priceBand: live.priceBand || merged[existingIndex].priceBand,
+        lotSize: live.lotSize || merged[existingIndex].lotSize,
+        subscription: live.subscription || merged[existingIndex].subscription,
+        bids: live.bids || merged[existingIndex].bids,
+        sharesOffered: live.sharesOffered || merged[existingIndex].sharesOffered,
+        source: 'nse',
+      };
+    } else {
+      merged.push({
+        ...live,
+        gmp: '',
+        promoter: '',
+        notes: '',
+        source: 'nse',
+      });
+    }
+  }
+  return merged;
 }
 
 function renderIpoSource() {
@@ -816,23 +977,23 @@ function renderIpoSource() {
   banner.classList.remove('live', 'stale');
 
   if (!state.liveMeta) {
-    title.textContent = 'Connecting to NSE India…';
-    detail.textContent = 'Saved records remain available while the live feed loads.';
+    title.textContent = 'Connecting to market feeds…';
+    detail.textContent = 'All tracked records remain available.';
     icon.textContent = '↻';
     return;
   }
 
   if (state.liveMeta.stale) {
     banner.classList.add('stale');
-    title.textContent = 'NSE live feed is temporarily unavailable.';
+    title.textContent = 'Live feed is temporarily offline.';
     detail.textContent = state.liveMeta.fetchedAt
-      ? `Showing the last successful refresh from ${formatTimestamp(state.liveMeta.fetchedAt)}.`
-      : 'Showing saved records. Use Refresh live to try again.';
+      ? `Showing saved records from ${formatTimestamp(state.liveMeta.fetchedAt)}.`
+      : 'Showing saved records. Use Refresh live or Google Sheets Sync to update.';
     icon.textContent = '!';
   } else {
     banner.classList.add('live');
-    title.textContent = `Live mainboard IPOs fetched from ${state.liveMeta.source}.`;
-    detail.textContent = `${state.liveMeta.count} active issue${state.liveMeta.count === 1 ? '' : 's'} · updated ${formatTimestamp(state.liveMeta.fetchedAt)}. Subscription figures refresh with the feed.`;
+    title.textContent = `IPOs synchronized with ${state.liveMeta.source}.`;
+    detail.textContent = `${state.ipos.length} active and upcoming issues · updated ${formatTimestamp(state.liveMeta.fetchedAt)}.`;
     icon.textContent = '✓';
   }
   if (state.liveMeta.sourceUrl) link.href = safeURL(state.liveMeta.sourceUrl) || link.href;
@@ -850,14 +1011,17 @@ function ipoStatus(ipo) {
 function renderDashboard() {
   const stats = taskStats();
   const current = firstIncompleteModule();
-  const activeIpos = state.ipos.filter((ipo) => ['open', 'closing'].includes(ipoStatus(ipo).key));
+  const openCount = state.ipos.filter((ipo) => ['open', 'closing'].includes(ipoStatus(ipo).key)).length;
+  const upcomingCount = state.ipos.filter((ipo) => ipoStatus(ipo).key === 'upcoming').length;
+  const totalTracked = state.ipos.length;
+
   $('#metric-progress').textContent = `${stats.pct}%`;
   $('#metric-progress-bar').style.width = `${stats.pct}%`;
   $('#metric-progress-copy').textContent = `${stats.done} of ${stats.total} lessons complete`;
   $('#metric-current-module').textContent = current?.name || 'Curriculum complete';
   $('#metric-current-copy').textContent = current ? `${moduleStats(current).done} of ${current.tasks.length} lessons done` : 'Excellent work';
-  $('#metric-open-ipos').textContent = activeIpos.length;
-  $('#metric-ipo-copy').textContent = activeIpos.some((ipo) => ipoStatus(ipo).key === 'closing') ? 'At least one closes today' : 'Based on saved dates';
+  $('#metric-open-ipos').textContent = totalTracked;
+  $('#metric-ipo-copy').textContent = `${openCount} open now · ${upcomingCount} upcoming`;
 
   $('#dashboard-learning-list').innerHTML = MODULES.slice(0, 4).map((module) => {
     const progress = moduleStats(module);
@@ -867,12 +1031,436 @@ function renderDashboard() {
   const prioritized = [...state.ipos].sort((a, b) => {
     const order = { closing: 0, open: 1, upcoming: 2, closed: 3 };
     return order[ipoStatus(a).key] - order[ipoStatus(b).key];
-  }).slice(0, 3);
+  });
+
   $('#dashboard-ipo-list').innerHTML = prioritized.length ? prioritized.map((ipo) => {
     const status = ipoStatus(ipo);
-    return `<div class="ipo-mini"><div class="ipo-mini-top"><div><strong>${escapeHTML(ipo.name)}</strong><small>${escapeHTML(ipo.priceBand || 'Price band not added')} · closes ${formatDate(ipo.closeDate)}</small></div><span class="status ${status.key}">${status.label}</span></div></div>`;
+    const subText = ipo.subscription ? ` · ${escapeHTML(ipo.subscription)} sub` : '';
+    const gmpText = ipo.gmp ? ` · GMP ${escapeHTML(ipo.gmp)}` : '';
+    return `
+      <div class="ipo-mini">
+        <div class="ipo-mini-top">
+          <div>
+            <strong>${escapeHTML(ipo.name)}</strong>
+            <small>${escapeHTML(ipo.priceBand || 'Price band not added')}${subText}${gmpText} · closes ${formatDate(ipo.closeDate)}</small>
+          </div>
+          <span class="status ${status.key}">${status.label}</span>
+        </div>
+      </div>`;
   }).join('') : '<div class="empty-state">No IPOs tracked.</div>';
-  $('#metric-open-ipos').textContent = activeIpos.length;
+}
+
+/* ================= GOOGLE SHEETS & CSV DATA SYNC ================= */
+
+let selectedSyncFile = null;
+
+function bindSyncModal() {
+  const openBtn = $('#open-sheet-sync-button');
+  const modal = $('#ipo-sync-modal');
+  const closeBtn = $('#close-ipo-sync-modal');
+
+  if (openBtn) openBtn.addEventListener('click', openSyncModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeSyncModal);
+  if (modal) {
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) closeSyncModal();
+    });
+  }
+
+  // Cancel buttons inside tabs
+  $('#cancel-sync-url-btn')?.addEventListener('click', closeSyncModal);
+  $('#cancel-sync-paste-btn')?.addEventListener('click', closeSyncModal);
+  $('#cancel-sync-file-btn')?.addEventListener('click', closeSyncModal);
+  $('#close-export-tab-btn')?.addEventListener('click', closeSyncModal);
+
+  // Tab switching
+  const tabs = [
+    { btn: '#tab-sheet-url', content: '#content-sheet-url' },
+    { btn: '#tab-sheet-paste', content: '#content-sheet-paste' },
+    { btn: '#tab-sheet-upload', content: '#content-sheet-upload' },
+    { btn: '#tab-sheet-export', content: '#content-sheet-export' },
+  ];
+
+  tabs.forEach(({ btn, content }) => {
+    $(btn)?.addEventListener('click', () => {
+      tabs.forEach((t) => {
+        $(t.btn)?.classList.remove('active');
+        const c = $(t.content);
+        if (c) c.hidden = true;
+      });
+      $(btn)?.classList.add('active');
+      const targetContent = $(content);
+      if (targetContent) targetContent.hidden = false;
+      if (btn === '#tab-sheet-export') {
+        $('#export-count-label').textContent = `${state.ipos.length} IPOs`;
+      }
+    });
+  });
+
+  // Action: Google Sheets URL Fetch
+  $('#fetch-sheet-url-btn')?.addEventListener('click', handleSheetUrlFetch);
+
+  // Action: Paste Rows Import
+  $('#import-pasted-data-btn')?.addEventListener('click', handlePastedDataImport);
+
+  // Action: File upload
+  const dropZone = $('#file-drop-zone');
+  const fileInput = $('#sync-file-input');
+  const importFileBtn = $('#import-uploaded-file-btn');
+
+  if (dropZone && fileInput) {
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files?.length) {
+        processSyncFile(e.dataTransfer.files[0]);
+      }
+    });
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files?.length) {
+        processSyncFile(e.target.files[0]);
+      }
+    });
+  }
+
+  if (importFileBtn) {
+    importFileBtn.addEventListener('click', handleImportUploadedFile);
+  }
+
+  // Action: Export CSV
+  $('#download-csv-btn')?.addEventListener('click', exportIposToCsv);
+}
+
+function openSyncModal() {
+  const modal = $('#ipo-sync-modal');
+  if (!modal) return;
+  modal.hidden = false;
+  $('#export-count-label').textContent = `${state.ipos.length} IPOs`;
+}
+
+function closeSyncModal() {
+  const modal = $('#ipo-sync-modal');
+  if (modal) modal.hidden = true;
+}
+
+async function handleSheetUrlFetch() {
+  const input = $('#sync-sheet-url-input');
+  const button = $('#fetch-sheet-url-btn');
+  const url = (input?.value || '').trim();
+
+  if (!url) {
+    toast('Please enter a Google Sheets or CSV URL.');
+    input?.focus();
+    return;
+  }
+
+  button.classList.add('loading');
+  button.disabled = true;
+
+  try {
+    const res = await fetch('/api/ipos/sync-sheet', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to fetch spreadsheet');
+
+    const parsedIpos = parseCsvIpos(data.csv);
+    if (!parsedIpos.length) {
+      throw new Error('No valid IPO rows could be parsed from the spreadsheet. Check columns.');
+    }
+
+    state.ipos = mergeWithDefaults(state.ipos, parsedIpos);
+    state.liveMeta = {
+      source: 'Google Sheets / Online Sync',
+      sourceUrl: url,
+      fetchedAt: new Date().toISOString(),
+      stale: false,
+      count: state.ipos.length,
+    };
+    saveState();
+    renderAll();
+    closeSyncModal();
+    toast(`Successfully imported ${parsedIpos.length} IPOs from Google Sheets!`);
+  } catch (err) {
+    alert(`Could not sync Google Sheet: ${err.message}`);
+  } finally {
+    button.classList.remove('loading');
+    button.disabled = false;
+  }
+}
+
+function handlePastedDataImport() {
+  const textarea = $('#sync-paste-textarea');
+  const rawText = (textarea?.value || '').trim();
+  if (!rawText) {
+    toast('Please paste table data from Google Sheets or Excel.');
+    textarea?.focus();
+    return;
+  }
+
+  const parsedIpos = parseCsvIpos(rawText);
+  if (!parsedIpos.length) {
+    toast('Could not find valid rows in the pasted data. Please check format.');
+    return;
+  }
+
+  state.ipos = mergeWithDefaults(state.ipos, parsedIpos);
+  saveState();
+  renderAll();
+  closeSyncModal();
+  toast(`Imported ${parsedIpos.length} IPOs from pasted data.`);
+}
+
+function processSyncFile(file) {
+  selectedSyncFile = file;
+  const preview = $('#file-upload-preview');
+  const btn = $('#import-uploaded-file-btn');
+  if (preview) {
+    preview.hidden = false;
+    preview.textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+  }
+  if (btn) btn.disabled = false;
+}
+
+function handleImportUploadedFile() {
+  if (!selectedSyncFile) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const text = e.target.result;
+      let parsedIpos = [];
+      if (selectedSyncFile.name.endsWith('.json')) {
+        const json = JSON.parse(text);
+        parsedIpos = Array.isArray(json) ? json : (json.ipos || []);
+      } else {
+        parsedIpos = parseCsvIpos(text);
+      }
+
+      if (!parsedIpos.length) {
+        throw new Error('No IPO items found in this file.');
+      }
+
+      state.ipos = mergeWithDefaults(state.ipos, parsedIpos);
+      saveState();
+      renderAll();
+      closeSyncModal();
+      toast(`Imported ${parsedIpos.length} IPOs from ${selectedSyncFile.name}!`);
+    } catch (err) {
+      alert(`File import error: ${err.message}`);
+    }
+  };
+  reader.readAsText(selectedSyncFile);
+}
+
+function parseCsvIpos(rawText) {
+  if (!rawText || typeof rawText !== 'string') return [];
+  const lines = rawText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  if (!lines.length) return [];
+
+  // Determine delimiter: tab or comma
+  const firstLine = lines[0];
+  const delimiter = firstLine.includes('\t') ? '\t' : ',';
+
+  function parseLine(line) {
+    const values = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"' || char === "'") {
+        inQuotes = !inQuotes;
+      } else if (char === delimiter && !inQuotes) {
+        values.push(current.trim().replace(/^["']|["']$/g, ''));
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    values.push(current.trim().replace(/^["']|["']$/g, ''));
+    return values;
+  }
+
+  const rows = lines.map(parseLine);
+  if (!rows.length) return [];
+
+  // Check if first row is header
+  const headerRow = rows[0].map((h) => h.toLowerCase());
+  const hasHeader = headerRow.some((h) =>
+    h.includes('name') || h.includes('company') || h.includes('symbol') || h.includes('ipo') || h.includes('price')
+  );
+
+  const colMap = {};
+  if (hasHeader) {
+    headerRow.forEach((col, idx) => {
+      if (col.includes('company') || col.includes('name') || col.includes('issuer')) colMap.name = idx;
+      else if (col.includes('symbol') || col.includes('ticker')) colMap.symbol = idx;
+      else if (col.includes('exchange') || col.includes('series') || col.includes('segment')) colMap.exchange = idx;
+      else if (col.includes('open') || col.includes('start')) colMap.openDate = idx;
+      else if (col.includes('close') || col.includes('end')) colMap.closeDate = idx;
+      else if (col.includes('price') || col.includes('band')) colMap.priceBand = idx;
+      else if (col.includes('lot')) colMap.lotSize = idx;
+      else if (col.includes('gmp') || col.includes('premium')) colMap.gmp = idx;
+      else if (col.includes('sub') || col.includes('times')) colMap.subscription = idx;
+      else if (col.includes('shares') || col.includes('issue size')) colMap.sharesOffered = idx;
+      else if (col.includes('bid')) colMap.bids = idx;
+      else if (col.includes('promoter') || col.includes('parent')) colMap.promoter = idx;
+      else if (col.includes('link') || col.includes('rhp') || col.includes('url')) colMap.link = idx;
+      else if (col.includes('note') || col.includes('research') || col.includes('detail')) colMap.notes = idx;
+    });
+  }
+
+  const dataRows = hasHeader ? rows.slice(1) : rows;
+  const ipos = [];
+
+  for (const row of dataRows) {
+    if (!row.length || !row.some((cell) => cell.length > 0)) continue;
+
+    let name = '';
+    let symbol = '';
+    let exchange = 'NSE / BSE · Mainboard';
+    let openDate = '';
+    let closeDate = '';
+    let priceBand = '';
+    let lotSize = '';
+    let gmp = '';
+    let subscription = '';
+    let sharesOffered = '';
+    let bids = '';
+    let promoter = '';
+    let link = '';
+    let notes = '';
+
+    if (hasHeader && Object.keys(colMap).length > 0) {
+      name = colMap.name !== undefined ? row[colMap.name] : (row[0] || '');
+      symbol = colMap.symbol !== undefined ? row[colMap.symbol] : '';
+      exchange = colMap.exchange !== undefined ? row[colMap.exchange] : 'NSE / BSE · Mainboard';
+      openDate = colMap.openDate !== undefined ? row[colMap.openDate] : '';
+      closeDate = colMap.closeDate !== undefined ? row[colMap.closeDate] : '';
+      priceBand = colMap.priceBand !== undefined ? row[colMap.priceBand] : '';
+      lotSize = colMap.lotSize !== undefined ? row[colMap.lotSize] : '';
+      gmp = colMap.gmp !== undefined ? row[colMap.gmp] : '';
+      subscription = colMap.subscription !== undefined ? row[colMap.subscription] : '';
+      sharesOffered = colMap.sharesOffered !== undefined ? row[colMap.sharesOffered] : '';
+      bids = colMap.bids !== undefined ? row[colMap.bids] : '';
+      promoter = colMap.promoter !== undefined ? row[colMap.promoter] : '';
+      link = colMap.link !== undefined ? row[colMap.link] : '';
+      notes = colMap.notes !== undefined ? row[colMap.notes] : '';
+    } else {
+      // Positional fallback
+      name = row[0] || '';
+      openDate = row[1] || '';
+      closeDate = row[2] || '';
+      priceBand = row[3] || '';
+      lotSize = row[4] || '';
+      gmp = row[5] || '';
+      subscription = row[6] || '';
+      promoter = row[7] || '';
+      link = row[8] || '';
+      notes = row[9] || '';
+    }
+
+    name = String(name || '').trim();
+    if (!name || name.toLowerCase() === 'name' || name.toLowerCase() === 'company') continue;
+
+    // Normalize dates
+    openDate = normalizeImportDate(openDate);
+    closeDate = normalizeImportDate(closeDate);
+
+    // If exchange contains SME
+    if (name.toLowerCase().includes('sme') || exchange.toLowerCase().includes('sme')) {
+      exchange = 'NSE Emerge · SME';
+    }
+
+    ipos.push({
+      id: `${slugify(name)}-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      symbol: symbol ? symbol.toUpperCase().trim() : '',
+      name,
+      exchange: exchange || 'NSE / BSE · Mainboard',
+      openDate: openDate || localISODate(),
+      closeDate: closeDate || localISODate(),
+      priceBand: priceBand || '',
+      lotSize: lotSize || '',
+      gmp: gmp || '',
+      subscription: subscription || '',
+      sharesOffered: sharesOffered || '',
+      bids: bids || '',
+      promoter: promoter || '',
+      link: link || '',
+      notes: notes || '',
+      source: 'sheet',
+    });
+  }
+
+  return ipos;
+}
+
+function normalizeImportDate(dateStr) {
+  if (!dateStr || typeof dateStr !== 'string') return '';
+  const clean = dateStr.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) return clean;
+
+  const parsed = new Date(clean);
+  if (!isNaN(parsed.getTime())) {
+    const y = parsed.getFullYear();
+    const m = String(parsed.getMonth() + 1).padStart(2, '0');
+    const d = String(parsed.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  return clean;
+}
+
+function exportIposToCsv() {
+  const headers = [
+    'Company Name',
+    'Symbol',
+    'Segment / Exchange',
+    'Open Date',
+    'Close Date',
+    'Price Band',
+    'Lot Size',
+    'GMP',
+    'Subscription',
+    'Shares Offered',
+    'Total Bids',
+    'Promoter Group',
+    'RHP / Official Link',
+    'Research Notes',
+  ];
+
+  const rows = state.ipos.map((ipo) => [
+    `"${(ipo.name || '').replace(/"/g, '""')}"`,
+    `"${(ipo.symbol || '').replace(/"/g, '""')}"`,
+    `"${(ipo.exchange || '').replace(/"/g, '""')}"`,
+    ipo.openDate || '',
+    ipo.closeDate || '',
+    `"${(ipo.priceBand || '').replace(/"/g, '""')}"`,
+    `"${(ipo.lotSize || '').replace(/"/g, '""')}"`,
+    `"${(ipo.gmp || '').replace(/"/g, '""')}"`,
+    `"${(ipo.subscription || '').replace(/"/g, '""')}"`,
+    `"${(ipo.sharesOffered || '').replace(/"/g, '""')}"`,
+    `"${(ipo.bids || '').replace(/"/g, '""')}"`,
+    `"${(ipo.promoter || '').replace(/"/g, '""')}"`,
+    `"${(ipo.link || '').replace(/"/g, '""')}"`,
+    `"${(ipo.notes || '').replace(/"/g, '""')}"`,
+  ]);
+
+  const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement('a');
+  link.setAttribute('href', encodedUri);
+  link.setAttribute('download', `marketmind_ipos_${localISODate()}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  toast('IPO watchlist CSV exported successfully.');
 }
 
 /* ================= STRATEGY SIMPLER ================= */
@@ -946,9 +1534,24 @@ function bindStrategies() {
 }
 
 function renderStrategyCatalog() {
-  $('#nav-strategy-count').textContent = STRATEGIES.length;
-  $('#strategy-count').textContent = STRATEGIES.length;
-  $('#strategy-count-label').textContent = STRATEGIES.length === 1 ? 'strategy' : 'strategies';
+  const count = STRATEGIES.length;
+  $('#nav-strategy-count').textContent = count;
+  $('#strategy-count').textContent = count;
+  $('#strategy-count-label').textContent = count === 1 ? 'strategy' : 'strategies';
+
+  if (count === 0) {
+    $('#strategy-catalog').innerHTML = `
+      <div class="empty-catalog-state" style="grid-column: 1 / -1; padding: 48px 24px; text-align: center; background: rgba(11, 18, 34, 0.6); border: 1px dashed var(--line); border-radius: 12px;">
+        <span style="font-size: 32px; display: block; margin-bottom: 12px;">📋</span>
+        <h3 style="font-size: 18px; margin: 0 0 8px; color: var(--text);">Ready for Your Custom Strategy</h3>
+        <p style="color: var(--muted); font-size: 14px; max-width: 480px; margin: 0 auto; line-height: 1.5;">
+          All previous strategies have been cleared. Share the exact strategy rules, indicators, and framework you want to build deeply and correctly!
+        </p>
+      </div>
+    `;
+    return;
+  }
+
   $('#strategy-catalog').innerHTML = STRATEGIES.map((strategy, index) => `
     <button class="strategy-card" type="button" data-strategy-id="${escapeAttr(strategy.id)}" data-accent="${escapeAttr(strategy.accent)}">
       <span class="strategy-card-top"><span class="strategy-card-index">${String(index + 1).padStart(2, '0')}</span><span class="strategy-card-risk">${escapeHTML(strategy.risk)}</span></span>
@@ -973,7 +1576,9 @@ function openStrategy(id) {
   $('#strategy-detail-view').hidden = false;
   renderStrategyDetail(strategy);
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  loadLiveMarketData({ force: false });
+  if (strategy.simulator.underlying === 'NIFTY') {
+    loadLiveMarketData({ force: false });
+  }
 }
 
 function closeStrategy() {
@@ -1023,14 +1628,32 @@ function renderStrategyDetail(strategy) {
   $('#strategy-market-note').textContent = strategy.marketNote;
   $('#strategy-rules').innerHTML = strategy.rules.map((rule) => `<li>${escapeHTML(rule)}</li>`).join('');
 
-  const video = $('#strategy-video-link');
-  if (strategy.videoUrl) {
-    video.hidden = false;
-    video.href = safeURL(strategy.videoUrl);
+  const linksWrap = $('#strategy-video-links-wrap');
+  if (strategy.videoLinks && strategy.videoLinks.length) {
+    linksWrap.innerHTML = strategy.videoLinks.map((item, idx) => `
+      <a class="strategy-video-link" href="${safeURL(item.url)}" target="_blank" rel="noopener noreferrer">
+        ▶ Video ${idx + 1}: ${escapeHTML(item.title)} ↗
+      </a>
+    `).join('');
+  } else if (strategy.videoUrl) {
+    linksWrap.innerHTML = `
+      <a class="strategy-video-link" href="${safeURL(strategy.videoUrl)}" target="_blank" rel="noopener noreferrer">
+        ▶ Watch source: ${escapeHTML(strategy.source || 'Strategy Video')} ↗
+      </a>
+    `;
   } else {
-    video.hidden = true;
-    video.removeAttribute('href');
+    linksWrap.innerHTML = '';
   }
+
+  const hasCondorLegs = Boolean(
+    strategyInputs.legs.find((l) => l.id === 'shortCall') &&
+    strategyInputs.legs.find((l) => l.id === 'longCall') &&
+    strategyInputs.legs.find((l) => l.id === 'shortPut') &&
+    strategyInputs.legs.find((l) => l.id === 'longPut')
+  );
+  $('#strategy-formula-panel').hidden = !hasCondorLegs;
+  $('#strategy-market-chart-panel').hidden = strategy.simulator.underlying !== 'NIFTY';
+  $('#live-paper-panel').hidden = strategy.simulator.underlying !== 'NIFTY';
 
   $('#formula-thesis-reason').value = state.strategyWorksheet.thesisReason;
   $('#formula-upper-reason').value = state.strategyWorksheet.upperReason;
@@ -1043,7 +1666,10 @@ function renderStrategyDetail(strategy) {
   renderStrategyLegs();
   renderPnlInputs(strategy);
   updateStrategyAnalytics(strategy);
-  renderLiveMarketPanel();
+  renderCaseStudy(strategy);
+  if (strategy.simulator.underlying === 'NIFTY') {
+    renderLiveMarketPanel();
+  }
 }
 
 async function loadLiveMarketData({ force = false, expiry = '', refreshPaper = false } = {}) {
@@ -1320,6 +1946,7 @@ function renderStrategyFormula(strategy, analytics) {
   $('#market-chart-upper').textContent = Number(shortCall.strike || 0).toLocaleString('en-IN');
   $('#market-chart-put-leg').textContent = `Sell ${shortPut.strike} PE · protect ${longPut.strike} PE`;
   $('#market-chart-call-leg').textContent = `Sell ${shortCall.strike} CE · protect ${longCall.strike} CE`;
+  const expiryLabel = strategyInputMode === 'video' ? '9 May' : liveMarketData?.expiry || 'Active';
   $('#market-chart-expiry').textContent = `Expiry ${expiryLabel}`;
 }
 
@@ -1522,6 +2149,307 @@ function renderPayoffChart(points, spot) {
     <path class="chart-line" d="${line}"></path>`;
 }
 
+function renderCaseStudy(strategy) {
+  const panel = $('#strategy-case-study-panel');
+  if (!panel) return;
+  if (!strategy || !strategy.caseStudy) {
+    panel.hidden = true;
+    return;
+  }
+  panel.hidden = false;
+  const cs = strategy.caseStudy;
+  const titleEl = $('#case-study-title');
+  if (titleEl) titleEl.textContent = cs.title;
+  const badgeEl = $('#case-study-badge');
+  if (badgeEl) badgeEl.textContent = cs.step1Screening.badge || 'Worked Case Study';
+
+  const content = $('#case-study-content');
+  if (!content) return;
+  content.innerHTML = `
+    <div class="case-study-grid">
+      <!-- Step 1: Screening Check -->
+      <div class="case-step-card">
+        <div class="case-step-header">
+          <span class="case-step-num">Step 01</span>
+          <h3>${escapeHTML(cs.step1Screening.title)}</h3>
+        </div>
+        <p class="case-step-desc">${escapeHTML(cs.step1Screening.summary)}</p>
+        <div class="case-filter-tags">
+          <span class="case-tag pass">✓ Nifty 100 Constituent</span>
+          <span class="case-tag pass">✓ Price &lt; ₹3,000 (₹446.75)</span>
+          <span class="case-tag pass">✓ High-Beta Auto / Momentum</span>
+          <span class="case-tag metric">+44.19% (6M)</span>
+          <span class="case-tag metric">+16.96% (1M)</span>
+        </div>
+      </div>
+
+      <!-- Step 2: Real Price Levels -->
+      <div class="case-step-card">
+        <div class="case-step-header">
+          <span class="case-step-num">Step 02</span>
+          <h3>${escapeHTML(cs.step2Levels.title)}</h3>
+          <span class="case-date-badge">${escapeHTML(cs.step2Levels.timeLabel)}</span>
+        </div>
+        <div class="case-price-matrix">
+          <div class="price-box highlight">
+            <span>Live Traded Price</span>
+            <strong>₹${cs.step2Levels.livePrice.toFixed(2)}</strong>
+            <em class="change-neg">${escapeHTML(cs.step2Levels.liveChange)} today</em>
+          </div>
+          <div class="price-box">
+            <span>52-Week High</span>
+            <strong>₹${cs.step2Levels.high52W.toFixed(2)}</strong>
+            <em>Swing Target Zone</em>
+          </div>
+          <div class="price-box">
+            <span>52-Week Low</span>
+            <strong>₹${cs.step2Levels.low52W.toFixed(2)}</strong>
+            <em>Base Support</em>
+          </div>
+          <div class="price-box full-width">
+            <span>Recent Consolidation / Resistance Area</span>
+            <strong>${escapeHTML(cs.step2Levels.consolidationZone)}</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Dummy Trade Setup Table -->
+      <div class="case-step-card full-span">
+        <div class="case-step-header">
+          <span class="case-step-num">Step 03</span>
+          <h3>${escapeHTML(cs.step3Setup.title)}</h3>
+        </div>
+        <div class="case-table-wrap">
+          <table class="case-trade-table">
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Value</th>
+                <th>Strategy Execution Logic</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Stock</strong></td>
+                <td><span class="stock-chip">${escapeHTML(cs.stock)}</span></td>
+                <td>High-beta, Nifty 100 auto momentum constituent</td>
+              </tr>
+              <tr>
+                <td><strong>Entry</strong></td>
+                <td><strong class="entry-val">₹${cs.step3Setup.entry.toFixed(2)}</strong></td>
+                <td>${escapeHTML(cs.step3Setup.entryLogic)}</td>
+              </tr>
+              <tr>
+                <td><strong>Stop-loss</strong></td>
+                <td><strong class="sl-val">₹${cs.step3Setup.stopLoss.toFixed(2)}</strong></td>
+                <td>${escapeHTML(cs.step3Setup.stopLossLogic)}</td>
+              </tr>
+              <tr>
+                <td><strong>Target</strong></td>
+                <td><strong class="target-val">₹${cs.step3Setup.target.toFixed(2)}</strong></td>
+                <td>${escapeHTML(cs.step3Setup.targetLogic)}</td>
+              </tr>
+              <tr>
+                <td><strong>Risk per share</strong></td>
+                <td><strong class="risk-val">₹${cs.step3Setup.riskPerShare.toFixed(2)}</strong></td>
+                <td>₹${cs.step3Setup.entry.toFixed(2)} − ₹${cs.step3Setup.stopLoss.toFixed(2)} initial buffer</td>
+              </tr>
+              <tr>
+                <td><strong>Reward per share</strong></td>
+                <td><strong class="reward-val">₹${cs.step3Setup.rewardPerShare.toFixed(2)}</strong></td>
+                <td>₹${cs.step3Setup.target.toFixed(2)} − ₹${cs.step3Setup.entry.toFixed(2)} swing potential</td>
+              </tr>
+              <tr class="highlight-row">
+                <td><strong>Risk : Reward (RRR)</strong></td>
+                <td><strong class="rrr-val">~${escapeHTML(cs.step3Setup.riskRewardRatio)}</strong></td>
+                <td>Favorable asymmetric payoff fulfilling the video's &gt;1:2 RRR rule</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Step 4: Position Sizing Calculator & Dual Constraint Rules -->
+      <div class="case-step-card full-span sizing-card">
+        <div class="case-step-header">
+          <span class="case-step-num">Step 04</span>
+          <h3>${escapeHTML(cs.step4Sizing.title)}</h3>
+          <span class="dual-rule-badge">Dual-Constraint Risk Engine</span>
+        </div>
+
+        <!-- Interactive Controls -->
+        <div class="sizing-inputs-bar">
+          <label>
+            <span>Portfolio Capital (₹)</span>
+            <input type="number" id="calc-portfolio" value="${cs.step4Sizing.portfolioCapital}" step="25000" min="10000">
+          </label>
+          <label>
+            <span>Risk Cap (% per trade)</span>
+            <input type="number" id="calc-risk-pct" value="${cs.step4Sizing.riskPct}" step="0.25" min="0.25" max="5">
+          </label>
+          <label>
+            <span>Max Capital Allocation (%)</span>
+            <input type="number" id="calc-cap-pct" value="${cs.step4Sizing.diversificationPct}" step="5" min="5" max="50">
+          </label>
+          <label>
+            <span>Entry Price (₹)</span>
+            <input type="number" id="calc-entry" value="${cs.step3Setup.entry}" step="0.5" min="1">
+          </label>
+          <label>
+            <span>Stop-Loss (₹)</span>
+            <input type="number" id="calc-sl" value="${cs.step3Setup.stopLoss}" step="0.5" min="1">
+          </label>
+          <label>
+            <span>Target Price (₹)</span>
+            <input type="number" id="calc-target" value="${cs.step3Setup.target}" step="0.5" min="1">
+          </label>
+        </div>
+
+        <!-- Sizing Results Display -->
+        <div id="sizing-results-display">
+          <!-- Dynamically generated -->
+        </div>
+      </div>
+
+      <!-- Step 5: Exit Logic -->
+      <div class="case-step-card full-span">
+        <div class="case-step-header">
+          <span class="case-step-num">Step 05</span>
+          <h3>${escapeHTML(cs.step5Exit.title)}</h3>
+        </div>
+        <div class="case-exit-rules">
+          ${cs.step5Exit.rules.map((rule, idx) => `
+            <div class="exit-rule-item">
+              <span class="exit-icon">${idx === 0 ? '🎯' : idx === 1 ? '🔄' : '🛑'}</span>
+              <p>${escapeHTML(rule)}</p>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Caveats and Training Note -->
+      <div class="case-caveats-box">
+        <div class="caveats-head">
+          <span>⚠️</span>
+          <strong>Analytical Caveat &amp; Training Context</strong>
+        </div>
+        <p>${escapeHTML(cs.caveats)}</p>
+      </div>
+    </div>
+  `;
+
+  bindSizingCalcEvents();
+  updateSizingCalc();
+}
+
+function bindSizingCalcEvents() {
+  ['#calc-portfolio', '#calc-risk-pct', '#calc-cap-pct', '#calc-entry', '#calc-sl', '#calc-target'].forEach((sel) => {
+    const input = $(sel);
+    if (input) {
+      input.addEventListener('input', updateSizingCalc);
+      input.addEventListener('change', updateSizingCalc);
+    }
+  });
+}
+
+function updateSizingCalc() {
+  const container = $('#sizing-results-display');
+  if (!container) return;
+
+  const portfolio = Math.max(1000, Number($('#calc-portfolio')?.value) || 500000);
+  const riskPct = Math.max(0.1, Number($('#calc-risk-pct')?.value) || 1.5);
+  const capPct = Math.max(1, Number($('#calc-cap-pct')?.value) || 20);
+  const entry = Math.max(0.5, Number($('#calc-entry')?.value) || 466);
+  const sl = Math.max(0.1, Number($('#calc-sl')?.value) || 448);
+  const target = Math.max(entry + 0.1, Number($('#calc-target')?.value) || 509);
+
+  const riskPerShare = Math.max(0.01, entry - sl);
+  const rewardPerShare = Math.max(0.01, target - entry);
+  const rrr = (rewardPerShare / riskPerShare).toFixed(2);
+
+  const maxRiskRupees = portfolio * (riskPct / 100);
+  const sharesByRisk = Math.floor(maxRiskRupees / riskPerShare);
+
+  const maxAllocationRupees = portfolio * (capPct / 100);
+  const sharesByCapital = Math.floor(maxAllocationRupees / entry);
+
+  const isCapBinding = sharesByCapital < sharesByRisk;
+  const tradeShares = Math.min(sharesByRisk, sharesByCapital);
+  const capitalDeployed = tradeShares * entry;
+  const capitalDeployedPct = ((capitalDeployed / portfolio) * 100).toFixed(1);
+  const actualRiskRupees = tradeShares * riskPerShare;
+  const actualRiskPct = ((actualRiskRupees / portfolio) * 100).toFixed(2);
+  const potentialRewardRupees = tradeShares * rewardPerShare;
+  const potentialRewardPct = ((potentialRewardRupees / portfolio) * 100).toFixed(2);
+
+  container.innerHTML = `
+    <div class="sizing-rules-grid">
+      <!-- Rule 1: Risk Cap -->
+      <div class="rule-calc-card ${!isCapBinding ? 'is-binding' : ''}">
+        <div class="rule-card-top">
+          <span class="rule-title">Rule 1 — Risk Cap (${riskPct}% per trade)</span>
+          ${!isCapBinding ? '<span class="binding-tag">Binding Constraint</span>' : ''}
+        </div>
+        <ul class="rule-math-list">
+          <li>${riskPct}% of ${formatCurrency(portfolio)} = <strong>${formatCurrency(maxRiskRupees)} max risk</strong></li>
+          <li>Shares by risk = ${formatCurrency(maxRiskRupees)} ÷ ₹${riskPerShare.toFixed(2)}</li>
+        </ul>
+        <div class="rule-result-shares">
+          <span>Allowed by risk limit:</span>
+          <strong>${sharesByRisk.toLocaleString('en-IN')} shares</strong>
+        </div>
+      </div>
+
+      <!-- Rule 2: Diversification Cap -->
+      <div class="rule-calc-card ${isCapBinding ? 'is-binding' : ''}">
+        <div class="rule-card-top">
+          <span class="rule-title">Rule 2 — Diversification Cap (max ${capPct}% capital)</span>
+          ${isCapBinding ? '<span class="binding-tag">Binding Constraint</span>' : ''}
+        </div>
+        <ul class="rule-math-list">
+          <li>${capPct}% of ${formatCurrency(portfolio)} = <strong>${formatCurrency(maxAllocationRupees)} max allocation</strong></li>
+          <li>Shares by capital = ${formatCurrency(maxAllocationRupees)} ÷ ₹${entry.toFixed(2)}</li>
+        </ul>
+        <div class="rule-result-shares">
+          <span>Allowed by capital limit:</span>
+          <strong>${sharesByCapital.toLocaleString('en-IN')} shares</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="binding-banner">
+      <div class="binding-icon">⚡</div>
+      <div class="binding-text">
+        <strong>Binding Constraint: ${isCapBinding ? `Diversification Rule (${capPct}% max capital per stock)` : `Risk Rule (${riskPct}% max portfolio risk)`}</strong>
+        <p>Because the ${isCapBinding ? 'diversification cap is stricter' : 'risk cap is stricter'}, the recommended safe trade size is strictly capped at <strong>${tradeShares.toLocaleString('en-IN')} shares</strong>.</p>
+      </div>
+    </div>
+
+    <div class="sizing-summary-strip">
+      <article>
+        <span>Capital Deployed</span>
+        <strong>${formatCurrency(capitalDeployed)}</strong>
+        <small>${capitalDeployedPct}% of portfolio</small>
+      </article>
+      <article>
+        <span>Actual ₹ Risk</span>
+        <strong class="orange">${formatCurrency(actualRiskRupees)}</strong>
+        <small>${actualRiskPct}% of portfolio (${riskPct}% ceiling)</small>
+      </article>
+      <article>
+        <span>Potential Reward</span>
+        <strong class="mint">+${formatCurrency(potentialRewardRupees)}</strong>
+        <small>+${potentialRewardPct}% portfolio gain</small>
+      </article>
+      <article>
+        <span>Risk : Reward (RRR)</span>
+        <strong class="mint">~${rrr} : 1</strong>
+        <small>₹${rewardPerShare.toFixed(2)} reward vs ₹${riskPerShare.toFixed(2)} risk</small>
+      </article>
+    </div>
+  `;
+}
+
 function formatCurrency(value) {
   const sign = Number(value) < 0 ? '-' : '';
   return `${sign}₹${Math.abs(Math.round(Number(value) || 0)).toLocaleString('en-IN')}`;
@@ -1533,17 +2461,41 @@ function compactCurrency(value) {
   return `${value < 0 ? '-' : ''}₹${formatted}`;
 }
 
+function clearChat(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  state.messages = [];
+  pendingAttachments = [];
+  renderAttachments();
+  const input = $('#chat-input');
+  if (input) {
+    input.value = '';
+    autoSizeComposer();
+  }
+  saveState();
+  renderChat();
+  toast('Chat cleared. New session started.');
+}
+
 function bindChat() {
-  ['#open-coach-button', '#sidebar-chat-button', '#hero-chat-button'].forEach((selector) => $(selector).addEventListener('click', openCoach));
-  $('#close-coach-button').addEventListener('click', closeCoach);
-  $('#coach-scrim').addEventListener('click', closeCoach);
-  $('#clear-chat-button').addEventListener('click', () => {
-    if (state.messages.length && !window.confirm('Clear the saved AI conversation from this browser?')) return;
-    state.messages = [];
-    saveState();
-    renderChat();
-    toast('Chat cleared.');
+  ['#open-coach-button', '#sidebar-chat-button', '#hero-chat-button', '#floating-coach-button'].forEach((selector) => {
+    const el = $(selector);
+    if (el) el.addEventListener('click', openCoach);
   });
+  const minBtn = $('#minimize-coach-button');
+  if (minBtn) minBtn.addEventListener('click', minimizeCoach);
+  const expandBtn = $('#expand-coach-button');
+  if (expandBtn) expandBtn.addEventListener('click', expandCoach);
+  const minStrip = $('#coach-minimized-strip');
+  if (minStrip) minStrip.addEventListener('click', expandCoach);
+  const closeBtn = $('#close-coach-button');
+  if (closeBtn) closeBtn.addEventListener('click', closeCoach);
+  const scrim = $('#coach-scrim');
+  if (scrim) scrim.addEventListener('click', closeCoach);
+  const clearBtn = $('#clear-chat-button');
+  if (clearBtn) clearBtn.addEventListener('click', clearChat);
   $('#chat-form').addEventListener('submit', sendChat);
   $('#chat-input').addEventListener('keydown', (event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -1553,11 +2505,22 @@ function bindChat() {
   });
   $('#chat-input').addEventListener('input', autoSizeComposer);
   $('#quick-prompts').addEventListener('click', (event) => {
-    const button = event.target.closest('[data-prompt]');
+    const button = event.target.closest('button');
     if (!button) return;
-    $('#chat-input').value = button.dataset.prompt;
-    autoSizeComposer();
-    $('#chat-input').focus();
+    if (button.dataset.promptAction === 'teardown') {
+      const selectedId = $('#chat-ipo-select').value;
+      const ipo = state.ipos.find((item) => item.id === selectedId) || state.ipos[0] || null;
+      $('#chat-mode').value = 'ipo';
+      $('#chat-input').value = getEquityAnalystTeardownPrompt(ipo);
+      autoSizeComposer();
+      $('#chat-input').focus();
+      return;
+    }
+    if (button.dataset.prompt) {
+      $('#chat-input').value = button.dataset.prompt;
+      autoSizeComposer();
+      $('#chat-input').focus();
+    }
   });
   $('#attachment-input').addEventListener('change', queueAttachments);
   $('#attachment-tray').addEventListener('click', (event) => {
@@ -1568,15 +2531,97 @@ function bindChat() {
   });
 }
 
+function getEquityAnalystTeardownPrompt(ipo) {
+  const companyName = ipo ? (ipo.symbol ? `${ipo.name} (${ipo.symbol})` : ipo.name) : '[Company Name]';
+  const facts = [];
+  if (ipo?.exchange) facts.push(`Exchange / Segment: ${ipo.exchange}`);
+  if (ipo?.priceBand) facts.push(`Price Band: ${ipo.priceBand}`);
+  if (ipo?.lotSize) facts.push(`Lot Size: ${ipo.lotSize}`);
+  if (ipo?.gmp) facts.push(`GMP (Grey Market): ${ipo.gmp}`);
+  if (ipo?.subscription) facts.push(`Subscription: ${ipo.subscription}`);
+  if (ipo?.sharesOffered) facts.push(`Shares Offered: ${ipo.sharesOffered}`);
+  if (ipo?.bids) facts.push(`Total Bids: ${ipo.bids}`);
+  if (ipo?.promoter) facts.push(`Parent / Promoter Group: ${ipo.promoter}`);
+  if (ipo?.notes) facts.push(`Workspace Research Notes: ${ipo.notes}`);
+
+  const knownContext = facts.length ? `\n\nKnown IPO / Watchlist parameters for ${ipo.name}:\n${facts.map((f) => `• ${f}`).join('\n')}\n` : '';
+
+  return `Act as a seasoned equity research analyst with 20 years of experience across fundamental analysis, technical analysis, and behavioral finance. I am providing you with the following documents for ${companyName}: annual financial statements, Management Discussion & Analysis, concall transcripts, a daily technical chart, key ratios from Screener, and the latest shareholding pattern.${knownContext}
+Tear this company apart across these dimensions:
+
+FUNDAMENTALS - Is this business genuinely healthy or just looks good on surface? Dig into revenue quality, margin trajectory, cash flow vs reported profits, debt structure, and ROE sustainability. Flag any accounting red flags.
+
+MANAGEMENT DNA - Read between the lines of the concall transcripts and MDA. Is management confident or defensive? Are they overpromising and underdelivering? Any change in language tone vs last year? Promoter pledge or stake reduction is an automatic red flag - call it out.
+
+VALUATION REALITY - Is the market pricing in perfection? Compare current P/E, EV/EBITDA against historical averages and sector peers. Tell me if I am paying a premium for growth that may never come.
+
+TECHNICAL STRUCTURE - Where is the stock in its trend cycle? Is it in accumulation, markup, distribution or markdown phase? Key support and resistance levels. Is volume confirming price action or diverging?
+
+RISK FACTORS - What are the 3 things that could destroy this thesis? Sector risk, company-specific risk, macro risk.
+
+FINAL VERDICT - Buy, Hold, or Avoid. Conviction score out of 10. Price at which this becomes interesting if not now. One line that summarizes this stock.
+
+Required verification documents / checklist:
+1. Annual Report - Last 2-3 years - from BSE/NSE or the company website
+2. MDA Report - Already inside the Annual Report - same PDF
+3. Concall Transcripts - Last 2-3 quarters - from Screener.in or Tijori Finance
+4. 1D Technical Chart Screenshot - TradingView - with 50 EMA, 200 EMA, RSI, Volume
+5. Screener.in Screenshot - P/E, ROE, Debt/Equity, Revenue growth, Profit growth, Operating Cash Flow, Promoter holding
+6. Shareholding Pattern - Latest quarter - from BSE/NSE
+
+Upload all 6 to Screener.in / ChatGPT / Claude or attach them here in MarketMind, then execute the teardown.`;
+}
+
+function applyCoachMinimizedState() {
+  const panel = $('#coach-panel');
+  const ws = $('.workspace');
+  const isMin = Boolean(state.coachMinimized);
+  if (panel) panel.classList.toggle('minimized', isMin);
+  if (ws) ws.classList.toggle('coach-minimized', isMin);
+}
+
+function minimizeCoach(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  if (window.innerWidth <= 1080) {
+    closeCoach();
+    return;
+  }
+  state.coachMinimized = true;
+  saveState();
+  applyCoachMinimizedState();
+  toast('AI Copilot minimized. Click the sidebar strip or Ask AI to expand.');
+}
+
+function expandCoach(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  state.coachMinimized = false;
+  saveState();
+  applyCoachMinimizedState();
+  openCoach();
+}
+
 function openCoach() {
-  $('#coach-panel').classList.add('open');
-  $('#coach-scrim').classList.add('active');
-  setTimeout(() => $('#chat-input').focus(), 120);
+  state.coachMinimized = false;
+  saveState();
+  applyCoachMinimizedState();
+  const panel = $('#coach-panel');
+  if (panel) panel.classList.add('open');
+  const scrim = $('#coach-scrim');
+  if (scrim) scrim.classList.add('active');
+  setTimeout(() => $('#chat-input')?.focus(), 120);
 }
 
 function closeCoach() {
-  $('#coach-panel').classList.remove('open');
-  $('#coach-scrim').classList.remove('active');
+  const panel = $('#coach-panel');
+  if (panel) panel.classList.remove('open');
+  const scrim = $('#coach-scrim');
+  if (scrim) scrim.classList.remove('active');
 }
 
 async function checkAI() {
@@ -1591,6 +2636,8 @@ async function checkAI() {
   $('#connection-label').textContent = onlineText;
   $('#connection-pill').classList.toggle('offline', !aiHealth.configured);
   $('#coach-status-dot').classList.toggle('offline', !aiHealth.configured);
+  const miniDot = $('#coach-mini-status-dot');
+  if (miniDot) miniDot.classList.toggle('offline', !aiHealth.configured);
   $('#coach-status-text').textContent = onlineText;
   $('#metric-ai-status').textContent = onlineText;
   $('#metric-ai-model').textContent = aiHealth.configured ? aiHealth.model : 'Add GEMINI_API_KEY to .env';
@@ -1608,10 +2655,12 @@ function analyzeIpo(id) {
   if (!ipo) return;
   $('#chat-ipo-select').value = id;
   $('#chat-mode').value = 'ipo';
-  $('#chat-input').value = `Tear down ${ipo.name}. Start with the three highest-priority questions I should answer from the RHP, then assess the evidence already in my notes. Be explicit about what is still missing.`;
+  $('#chat-input').value = getEquityAnalystTeardownPrompt(ipo);
   autoSizeComposer();
   openCoach();
-  toast(aiHealth.configured ? 'IPO context loaded. Attach the RHP for the strongest answer.' : 'IPO context loaded. Configure the AI key to send.');
+  toast(aiHealth.configured
+    ? `20-Yr Analyst teardown prompt loaded for ${ipo.name}. Attach documents or press send.`
+    : `20-Yr Analyst teardown prompt loaded for ${ipo.name}.`);
 }
 
 async function queueAttachments(event) {
@@ -1662,11 +2711,15 @@ async function sendChat(event) {
   try {
     const selectedIPO = state.ipos.find((ipo) => ipo.id === $('#chat-ipo-select').value) || null;
     const stats = taskStats();
+    const historyMessages = state.messages
+      .filter((m) => m.id !== assistant.id && m.content && m.content.trim())
+      .map(({ role, content: text }) => ({ role, content: text }));
+
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messages: state.messages.filter((message) => message.id !== assistant.id).map(({ role, content: text }) => ({ role, content: text })),
+        messages: historyMessages,
         attachments,
         context: {
           mode: $('#chat-mode').value,
@@ -1773,15 +2826,44 @@ function renderMarkdown(text) {
   const lines = safe.split('\n');
   let html = '';
   let list = null;
+  let inCodeBlock = false;
+  let codeBlockContent = '';
+
   const closeList = () => { if (list) { html += `</${list}>`; list = null; } };
+
   for (const rawLine of lines) {
     const line = rawLine.trimEnd();
+
+    if (line.startsWith('```')) {
+      if (inCodeBlock) {
+        html += `<pre><code>${codeBlockContent.trimEnd()}</code></pre>`;
+        inCodeBlock = false;
+        codeBlockContent = '';
+      } else {
+        closeList();
+        inCodeBlock = true;
+        codeBlockContent = '';
+      }
+      continue;
+    }
+
+    if (inCodeBlock) {
+      codeBlockContent += `${rawLine}\n`;
+      continue;
+    }
+
     if (/^###\s+/.test(line)) { closeList(); html += `<h3>${inlineMarkdown(line.replace(/^###\s+/, ''))}</h3>`; }
     else if (/^##\s+/.test(line)) { closeList(); html += `<h2>${inlineMarkdown(line.replace(/^##\s+/, ''))}</h2>`; }
+    else if (/^#\s+/.test(line)) { closeList(); html += `<h2>${inlineMarkdown(line.replace(/^#\s+/, ''))}</h2>`; }
     else if (/^[-*]\s+/.test(line)) { if (list !== 'ul') { closeList(); list = 'ul'; html += '<ul>'; } html += `<li>${inlineMarkdown(line.replace(/^[-*]\s+/, ''))}</li>`; }
     else if (/^\d+\.\s+/.test(line)) { if (list !== 'ol') { closeList(); list = 'ol'; html += '<ol>'; } html += `<li>${inlineMarkdown(line.replace(/^\d+\.\s+/, ''))}</li>`; }
+    else if (/^>\s+/.test(line)) { closeList(); html += `<blockquote>${inlineMarkdown(line.replace(/^>\s+/, ''))}</blockquote>`; }
     else if (!line.trim()) { closeList(); }
     else { closeList(); html += `<p>${inlineMarkdown(line)}</p>`; }
+  }
+
+  if (inCodeBlock) {
+    html += `<pre><code>${codeBlockContent.trimEnd()}</code></pre>`;
   }
   closeList();
   return html;
@@ -1865,4 +2947,667 @@ function toast(message) {
   element.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => element.classList.remove('show'), 2600);
+}
+
+/* ==========================================================================
+   Authentication & Admin Approval Handlers
+   ========================================================================== */
+
+let authMode = 'login'; // 'login' | 'register'
+let unsubAdminUsers = null;
+let activeInspectedUser = null;
+
+async function initFirebaseAuth() {
+  try {
+    await initFirebase();
+    onAuthStatusChanged(({ user, profile, loading }) => {
+      currentUser = user;
+      currentProfile = profile;
+      handleAuthStateUpdate();
+    });
+  } catch (err) {
+    console.error('Firebase setup failed in browser:', err);
+  }
+}
+
+function handleAuthStateUpdate() {
+  const isSuperAdmin = (currentUser?.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase();
+  const isAdmin = isSuperAdmin || currentProfile?.role === 'admin';
+  const isApproved = isSuperAdmin || currentProfile?.status === 'approved';
+
+  // Update Topbar Profile Pill
+  const userProfileBtn = $('#user-profile-btn');
+  const userAvatar = $('#topbar-user-avatar');
+  const userName = $('#topbar-user-name');
+  const userRole = $('#topbar-user-role');
+  const navAdminItem = $('#nav-admin-item');
+
+  if (currentUser) {
+    userName.textContent = currentProfile?.displayName || currentUser.displayName || currentUser.email?.split('@')[0] || 'User';
+    if (currentUser.photoURL) {
+      userAvatar.innerHTML = `<img src="${escapeAttr(currentUser.photoURL)}" alt="Avatar" referrerpolicy="no-referrer">`;
+    } else {
+      userAvatar.textContent = (userName.textContent[0] || 'U').toUpperCase();
+    }
+
+    if (isAdmin) {
+      userRole.hidden = false;
+      userRole.textContent = 'Admin';
+      userRole.style.color = 'var(--lime)';
+      navAdminItem.hidden = false;
+    } else {
+      userRole.hidden = false;
+      userRole.textContent = currentProfile?.status === 'approved' ? 'Member' : 'Pending';
+      userRole.style.color = currentProfile?.status === 'approved' ? 'var(--mint)' : 'var(--orange)';
+      navAdminItem.hidden = true;
+    }
+  } else {
+    userName.textContent = 'Sign In';
+    userAvatar.textContent = '👤';
+    userRole.hidden = true;
+    navAdminItem.hidden = true;
+  }
+
+  // Handle Admin Realtime Subscription
+  if (isAdmin) {
+    if (!unsubAdminUsers) {
+      unsubAdminUsers = subscribeToAllUsers((users) => {
+        allUsersList = users;
+        renderAdminUsersTable();
+        if (activeInspectedUser) {
+          const fresh = allUsersList.find((u) => u.id === activeInspectedUser.id);
+          if (fresh) populateRequestModal(fresh);
+        }
+      });
+    }
+  } else {
+    if (unsubAdminUsers) {
+      unsubAdminUsers();
+      unsubAdminUsers = null;
+    }
+  }
+
+  // Update Mandatory Authentication & Approval Gate Overlay
+  const approvalGate = $('#approval-gate');
+  const gateUnauthActions = $('#gate-unauth-actions');
+  const gatePendingActions = $('#gate-pending-actions');
+  const gateStatusPill = $('#gate-status-pill');
+
+  if (!currentUser) {
+    // Unauthenticated -> Show mandatory sign-in gate
+    approvalGate.hidden = false;
+    $('#gate-icon').textContent = '🔐';
+    $('#gate-kicker').textContent = 'Authentication Required';
+    $('#gate-title').textContent = 'Sign In to MarketMind';
+    $('#gate-description').textContent = 'Please sign in with your Google account or email to access the MarketMind options strategy builder, IPO watch, and AI research desk.';
+    if (gateStatusPill) gateStatusPill.hidden = true;
+    if (gateUnauthActions) gateUnauthActions.hidden = false;
+    if (gatePendingActions) gatePendingActions.hidden = true;
+  } else if (!isApproved) {
+    // Signed in but waiting for approval (or rejected)
+    approvalGate.hidden = false;
+    if (gateUnauthActions) gateUnauthActions.hidden = true;
+    if (gatePendingActions) gatePendingActions.hidden = false;
+    if (gateStatusPill) gateStatusPill.hidden = false;
+
+    const isRejected = currentProfile?.status === 'rejected';
+    if (isRejected) {
+      $('#gate-icon').textContent = '🚫';
+      $('#gate-kicker').textContent = 'Access Restricted';
+      $('#gate-title').textContent = 'Account Access Revoked';
+      $('#gate-description').textContent = 'Your access request was revoked by workspace administrator. Please contact the administrator to request reinstatement.';
+      gateStatusPill.innerHTML = `<span style="color:var(--red)">●</span> Status: Rejected`;
+      gateStatusPill.style.color = 'var(--red)';
+      gateStatusPill.style.borderColor = 'rgba(239, 116, 111, 0.3)';
+      gateStatusPill.style.background = 'rgba(239, 116, 111, 0.12)';
+    } else {
+      $('#gate-icon').textContent = '⏳';
+      $('#gate-kicker').textContent = 'Access Restricted';
+      $('#gate-title').textContent = 'Approval Pending';
+      $('#gate-description').innerHTML = `Your account (<strong>${escapeHTML(currentUser.email)}</strong>) is registered. A workspace administrator must approve your profile before you can access MarketMind research tools.`;
+      gateStatusPill.innerHTML = `<span class="pulse-dot"></span> Status: <span id="gate-status-text">Pending Admin Approval</span>`;
+      gateStatusPill.style.color = 'var(--orange)';
+      gateStatusPill.style.borderColor = 'rgba(246, 154, 102, 0.3)';
+      gateStatusPill.style.background = 'rgba(246, 154, 102, 0.12)';
+    }
+  } else {
+    // Signed in and approved (or SuperAdmin) -> Complete instant access
+    approvalGate.hidden = true;
+    maybeStartTour();
+  }
+}
+
+function bindAuth() {
+  // Topbar Profile button click
+  $('#user-profile-btn').addEventListener('click', () => {
+    if (currentUser) {
+      openAccountModal();
+    } else {
+      openAuthModal('login');
+    }
+  });
+
+  // Auth Modal Tab switching
+  $('#tab-login-btn').addEventListener('click', () => setAuthMode('login'));
+  $('#tab-register-btn').addEventListener('click', () => setAuthMode('register'));
+
+  // Close modals
+  $('#close-auth-modal').addEventListener('click', closeAuthModal);
+  $('#close-account-modal').addEventListener('click', closeAccountModal);
+  $('#close-req-modal').addEventListener('click', closeRequestDetailModal);
+
+  // Social Google Auth
+  $('#google-auth-btn').addEventListener('click', async () => {
+    try {
+      showAuthError(null);
+      await loginWithGoogle();
+      closeAuthModal();
+      toast('Signed in successfully with Google!');
+    } catch (err) {
+      console.error('Google login error:', err);
+      showAuthError(err.message || 'Google sign-in failed.');
+    }
+  });
+
+  // Direct Google Auth from Gate
+  const gateGoogleBtn = $('#gate-google-btn');
+  if (gateGoogleBtn) {
+    gateGoogleBtn.addEventListener('click', async () => {
+      try {
+        await loginWithGoogle();
+        toast('Signed in successfully with Google!');
+      } catch (err) {
+        console.error('Gate Google login error:', err);
+        toast(`Sign-in failed: ${err.message}`);
+      }
+    });
+  }
+
+  // Gate Email Auth buttons
+  const gateEmailBtn = $('#gate-email-login-btn');
+  if (gateEmailBtn) {
+    gateEmailBtn.addEventListener('click', () => {
+      openAuthModal('login');
+    });
+  }
+
+  // Email Auth Form Submit
+  $('#auth-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = $('#auth-email').value.trim();
+    const password = $('#auth-password').value;
+    const displayName = $('#auth-display-name').value.trim();
+    const submitBtn = $('#auth-submit-btn');
+
+    if (!email || !password) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = authMode === 'login' ? 'Signing in…' : 'Creating account…';
+    showAuthError(null);
+
+    try {
+      if (authMode === 'login') {
+        await loginWithEmail(email, password);
+        toast('Signed in successfully!');
+      } else {
+        await registerWithEmail(email, password, displayName);
+        toast('Registration complete! Account submitted for admin review.');
+      }
+      closeAuthModal();
+    } catch (err) {
+      console.error('Auth error:', err);
+      showAuthError(err.message?.replace('Firebase: ', '') || 'Authentication error occurred.');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = authMode === 'login' ? 'Sign In' : 'Create Account';
+    }
+  });
+
+  // Logout buttons
+  $('#logout-btn').addEventListener('click', async () => {
+    await logout();
+    closeAccountModal();
+    toast('You have been signed out.');
+  });
+
+  // Gate overlay actions
+  $('#gate-logout-btn').addEventListener('click', async () => {
+    try {
+      await logout();
+    } catch {}
+    currentUser = null;
+    currentProfile = null;
+    handleAuthStateUpdate();
+    toast('Signed out successfully.');
+  });
+
+  $('#gate-admin-login-btn').addEventListener('click', () => {
+    openAuthModal('login');
+    $('#auth-email').focus();
+  });
+
+  const gateSwitchAdminBtn = $('#gate-switch-admin-btn');
+  if (gateSwitchAdminBtn) {
+    gateSwitchAdminBtn.addEventListener('click', async () => {
+      try {
+        await logout();
+      } catch {}
+      currentUser = null;
+      currentProfile = null;
+      handleAuthStateUpdate();
+      openAuthModal('login');
+      $('#auth-email').focus();
+    });
+  }
+
+  $('#gate-check-status-btn').addEventListener('click', () => {
+    toast('Refreshing authorization status…');
+    handleAuthStateUpdate();
+  });
+
+  $('#admin-shortcut-btn').addEventListener('click', () => {
+    closeAccountModal();
+    navigate('admin');
+  });
+
+  // Admin filter tabs
+  $$('.filter-tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      $$('.filter-tab').forEach((t) => t.classList.remove('active'));
+      tab.classList.add('active');
+      adminFilter = tab.dataset.adminFilter;
+      renderAdminUsersTable();
+    });
+  });
+
+  // Admin search input
+  $('#admin-user-search').addEventListener('input', debounce((e) => {
+    adminSearchTerm = e.target.value.toLowerCase().trim();
+    renderAdminUsersTable();
+  }, 200));
+
+  // Admin Pending Cards Grid click handler
+  $('#admin-pending-cards').addEventListener('click', async (e) => {
+    const inspectBtn = e.target.closest('.btn-inspect');
+    const approveBtn = e.target.closest('.btn-approve');
+    const card = e.target.closest('.pending-user-card');
+
+    if (approveBtn) {
+      e.stopPropagation();
+      const uid = approveBtn.dataset.userId;
+      const email = approveBtn.dataset.userEmail;
+      approveBtn.disabled = true;
+      try {
+        await approveUser(uid, currentUser?.email || ADMIN_EMAIL);
+        toast(`Approved access for ${email}`);
+      } catch (err) {
+        toast(`Approval failed: ${err.message}`);
+      } finally {
+        approveBtn.disabled = false;
+      }
+      return;
+    }
+
+    if (card) {
+      const uid = card.dataset.userId;
+      const user = allUsersList.find((u) => u.id === uid);
+      if (user) openRequestDetailModal(user);
+    }
+  });
+
+  // Admin table event delegation for row inspection & action buttons
+  $('#admin-users-tbody').addEventListener('click', async (e) => {
+    const actionBtn = e.target.closest('button');
+    const row = e.target.closest('tr');
+
+    if (actionBtn) {
+      const action = actionBtn.dataset.action;
+      const userId = actionBtn.dataset.userId;
+      const userEmail = actionBtn.dataset.userEmail;
+
+      if (!action || !userId) return;
+
+      actionBtn.disabled = true;
+      try {
+        if (action === 'approve') {
+          await approveUser(userId, currentUser?.email || ADMIN_EMAIL);
+          toast(`Approved access for ${userEmail}`);
+        } else if (action === 'reject') {
+          await rejectUser(userId, currentUser?.email || ADMIN_EMAIL);
+          toast(`Rejected access for ${userEmail}`);
+        } else if (action === 'toggle-role') {
+          const currentRole = actionBtn.dataset.currentRole;
+          const newRole = currentRole === 'admin' ? 'member' : 'admin';
+          await setUserRole(userId, newRole);
+          toast(`Changed role for ${userEmail} to ${newRole}`);
+        } else if (action === 'delete') {
+          if (confirm(`Are you sure you want to remove user record for ${userEmail}?`)) {
+            await deleteUserProfile(userId);
+            toast(`Removed user ${userEmail}`);
+          }
+        }
+      } catch (err) {
+        console.error(`Action ${action} error:`, err);
+        toast(`Action failed: ${err.message}`);
+      } finally {
+        actionBtn.disabled = false;
+      }
+      return;
+    }
+
+    // Row clicked -> Inspect request
+    if (row && row.dataset.userId) {
+      const user = allUsersList.find((u) => u.id === row.dataset.userId);
+      if (user) openRequestDetailModal(user);
+    }
+  });
+
+  // Request Modal Action Buttons
+  $('#req-modal-approve-btn').addEventListener('click', async () => {
+    if (!activeInspectedUser) return;
+    const btn = $('#req-modal-approve-btn');
+    btn.disabled = true;
+    try {
+      await approveUser(activeInspectedUser.id, currentUser?.email || ADMIN_EMAIL);
+      toast(`Approved access for ${activeInspectedUser.email}`);
+      closeRequestDetailModal();
+    } catch (err) {
+      toast(`Failed: ${err.message}`);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $('#req-modal-reject-btn').addEventListener('click', async () => {
+    if (!activeInspectedUser) return;
+    const btn = $('#req-modal-reject-btn');
+    btn.disabled = true;
+    try {
+      await rejectUser(activeInspectedUser.id, currentUser?.email || ADMIN_EMAIL);
+      toast(`Access revoked/rejected for ${activeInspectedUser.email}`);
+      closeRequestDetailModal();
+    } catch (err) {
+      toast(`Failed: ${err.message}`);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $('#req-modal-role-btn').addEventListener('click', async () => {
+    if (!activeInspectedUser) return;
+    const btn = $('#req-modal-role-btn');
+    const newRole = activeInspectedUser.role === 'admin' ? 'member' : 'admin';
+    btn.disabled = true;
+    try {
+      await setUserRole(activeInspectedUser.id, newRole);
+      toast(`Role updated to ${newRole}`);
+      activeInspectedUser.role = newRole;
+      populateRequestModal(activeInspectedUser);
+    } catch (err) {
+      toast(`Failed: ${err.message}`);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+}
+
+function openAuthModal(mode = 'login') {
+  setAuthMode(mode);
+  showAuthError(null);
+  $('#auth-email').value = '';
+  $('#auth-password').value = '';
+  $('#auth-display-name').value = '';
+  $('#auth-modal').hidden = false;
+}
+
+function closeAuthModal() {
+  $('#auth-modal').hidden = true;
+}
+
+function setAuthMode(mode) {
+  authMode = mode;
+  $('#tab-login-btn').classList.toggle('active', mode === 'login');
+  $('#tab-register-btn').classList.toggle('active', mode === 'register');
+  $('#auth-modal-title').textContent = mode === 'login' ? 'Sign in to workspace' : 'Create an account';
+  $('#auth-submit-btn').textContent = mode === 'login' ? 'Sign In' : 'Create Account';
+  $('#auth-name-field').hidden = mode === 'login';
+}
+
+function showAuthError(msg) {
+  const errEl = $('#auth-error');
+  if (msg) {
+    errEl.textContent = msg;
+    errEl.hidden = false;
+  } else {
+    errEl.hidden = true;
+  }
+}
+
+function openAccountModal() {
+  if (!currentUser) return;
+  const isSuperAdmin = (currentUser.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase();
+  const isAdmin = isSuperAdmin || currentProfile?.role === 'admin';
+
+  $('#acc-name').textContent = currentProfile?.displayName || currentUser.displayName || currentUser.email?.split('@')[0] || 'Trader';
+  $('#acc-email').textContent = currentUser.email || '';
+
+  const avatarEl = $('#acc-avatar');
+  if (currentUser.photoURL) {
+    avatarEl.innerHTML = `<img src="${escapeAttr(currentUser.photoURL)}" alt="Avatar" referrerpolicy="no-referrer">`;
+  } else {
+    avatarEl.textContent = (currentUser.displayName || currentUser.email || 'U')[0].toUpperCase();
+  }
+
+  const statusBadge = $('#acc-status-badge');
+  const status = currentProfile?.status || (isSuperAdmin ? 'approved' : 'pending');
+  statusBadge.textContent = status.toUpperCase();
+  statusBadge.className = `status-badge status-${status}`;
+
+  const roleBadge = $('#acc-role-badge');
+  roleBadge.textContent = (currentProfile?.role || (isSuperAdmin ? 'admin' : 'member')).toUpperCase();
+
+  $('#admin-shortcut-btn').hidden = !isAdmin;
+  $('#account-modal').hidden = false;
+}
+
+function closeAccountModal() {
+  $('#account-modal').hidden = true;
+}
+
+function openRequestDetailModal(user) {
+  activeInspectedUser = user;
+  populateRequestModal(user);
+  $('#request-detail-modal').hidden = false;
+}
+
+function closeRequestDetailModal() {
+  $('#request-detail-modal').hidden = true;
+  activeInspectedUser = null;
+}
+
+function formatRelativeTime(dateStr) {
+  if (!dateStr) return '—';
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  if (diffSec < 60) return 'Just now';
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  const diffDays = Math.floor(diffHr / 24);
+  return `${diffDays}d ago`;
+}
+
+function populateRequestModal(user) {
+  const isSuperAdmin = (user.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase();
+  const isApproved = user.status === 'approved';
+
+  $('#req-modal-name').textContent = user.displayName || user.email?.split('@')[0] || 'User';
+  $('#req-modal-email').textContent = user.email || '—';
+  $('#req-modal-uid').textContent = user.id || '—';
+
+  const avatarEl = $('#req-modal-avatar');
+  if (user.photoURL) {
+    avatarEl.innerHTML = `<img src="${escapeAttr(user.photoURL)}" alt="" referrerpolicy="no-referrer">`;
+  } else {
+    avatarEl.textContent = (user.displayName || user.email || 'U')[0].toUpperCase();
+  }
+
+  const statusBadge = $('#req-modal-status');
+  statusBadge.textContent = (user.status || 'pending').toUpperCase();
+  statusBadge.className = `status-badge status-${user.status || 'pending'}`;
+
+  const roleBadge = $('#req-modal-role');
+  roleBadge.textContent = (user.role || 'member').toUpperCase();
+  roleBadge.style.color = user.role === 'admin' ? 'var(--lime)' : 'var(--muted)';
+
+  const formattedTime = user.createdAt ? new Intl.DateTimeFormat('en-IN', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  }).format(new Date(user.createdAt)) : '—';
+
+  $('#req-modal-time').textContent = formattedTime;
+  $('#req-modal-elapsed').textContent = formatRelativeTime(user.createdAt);
+  $('#req-modal-approvedby').textContent = isSuperAdmin ? 'Super Administrator' : (user.approvedBy ? (user.approvedBy.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'Super Administrator' : 'Administrator') : 'None (Awaiting Review)');
+
+  // Configure action buttons in inspector modal
+  const approveBtn = $('#req-modal-approve-btn');
+  const rejectBtn = $('#req-modal-reject-btn');
+  const roleBtn = $('#req-modal-role-btn');
+
+  if (isSuperAdmin) {
+    approveBtn.hidden = true;
+    rejectBtn.hidden = true;
+    roleBtn.hidden = true;
+  } else {
+    approveBtn.hidden = false;
+    rejectBtn.hidden = false;
+    roleBtn.hidden = false;
+
+    approveBtn.textContent = isApproved ? '✓ Re-Confirm Access' : '✓ Approve Access Now';
+    rejectBtn.textContent = isApproved ? '✕ Revoke Access' : '✕ Reject Request';
+    roleBtn.textContent = user.role === 'admin' ? 'Demote to Member Role' : 'Promote to Admin Role';
+  }
+}
+
+function renderAdminUsersTable() {
+  const tbody = $('#admin-users-tbody');
+  if (!tbody) return;
+
+  // Compute counts
+  const total = allUsersList.length;
+  const pendingUsers = allUsersList.filter((u) => u.status === 'pending');
+  const pending = pendingUsers.length;
+  const approved = allUsersList.filter((u) => u.status === 'approved').length;
+
+  $('#admin-count-pending').textContent = pending;
+  $('#admin-count-approved').textContent = approved;
+  $('#admin-count-total').textContent = total;
+  $('#admin-badge-pending').textContent = pending;
+  $('#nav-pending-count').textContent = pending;
+
+  // Update Pending Requests Cards Banner
+  const pendingBanner = $('#admin-pending-banner');
+  const pendingCards = $('#admin-pending-cards');
+  if (pending > 0) {
+    pendingBanner.hidden = false;
+    $('#pending-banner-count').textContent = pending;
+    pendingCards.innerHTML = pendingUsers.map((user) => {
+      const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
+      const avatarHtml = user.photoURL
+        ? `<img src="${escapeAttr(user.photoURL)}" alt="" referrerpolicy="no-referrer">`
+        : `<span>${escapeHTML(initial)}</span>`;
+      return `
+        <div class="pending-user-card" data-user-id="${escapeAttr(user.id)}">
+          <div class="pending-card-top">
+            <div class="pending-card-avatar">${avatarHtml}</div>
+            <div class="pending-card-meta">
+              <strong>${escapeHTML(user.displayName || user.email?.split('@')[0] || 'User')}</strong>
+              <span>${escapeHTML(user.email || '—')}</span>
+            </div>
+          </div>
+          <div class="pending-card-time">
+            <span>⏱️ Requested ${formatRelativeTime(user.createdAt)}</span>
+          </div>
+          <div class="pending-card-actions">
+            <button class="btn-inspect" type="button">👁️ Inspect</button>
+            <button class="btn-approve" data-user-id="${escapeAttr(user.id)}" data-user-email="${escapeAttr(user.email)}" type="button">✓ Approve</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } else {
+    pendingBanner.hidden = true;
+    pendingCards.innerHTML = '';
+  }
+
+  // Filter list for the main directory table
+  let filtered = allUsersList;
+  if (adminFilter !== 'all') {
+    filtered = filtered.filter((u) => u.status === adminFilter);
+  }
+  if (adminSearchTerm) {
+    filtered = filtered.filter((u) =>
+      (u.email || '').toLowerCase().includes(adminSearchTerm) ||
+      (u.displayName || '').toLowerCase().includes(adminSearchTerm)
+    );
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="table-empty">No user accounts found matching this filter.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((user) => {
+    const isSuperAdmin = (user.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase();
+    const isApproved = user.status === 'approved';
+    const registeredDate = user.createdAt ? new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(user.createdAt)) : '—';
+    const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
+    const avatarHtml = user.photoURL
+      ? `<img src="${escapeAttr(user.photoURL)}" alt="" referrerpolicy="no-referrer">`
+      : `<span>${escapeHTML(initial)}</span>`;
+
+    return `
+      <tr class="clickable-row" data-user-id="${escapeAttr(user.id)}" title="Click to inspect full request details">
+        <td>
+          <div class="user-cell">
+            <div class="user-cell-avatar">${avatarHtml}</div>
+            <div class="user-cell-info">
+              <strong>${escapeHTML(user.displayName || user.email?.split('@')[0] || 'User')}</strong>
+              <small>${isSuperAdmin ? '👑 Super Admin' : (user.approvedBy ? `Approved by ${escapeHTML(user.approvedBy)}` : 'Awaiting admin review')}</small>
+            </div>
+          </div>
+        </td>
+        <td><code>${escapeHTML(user.email || '—')}</code></td>
+        <td><small>${registeredDate} (${formatRelativeTime(user.createdAt)})</small></td>
+        <td>
+          <span class="role-badge" style="${user.role === 'admin' ? 'color:var(--lime);border-color:rgba(200,240,93,0.3);' : 'color:var(--muted);border-color:var(--line);'}">
+            ${escapeHTML((user.role || 'member').toUpperCase())}
+          </span>
+        </td>
+        <td>
+          <span class="status-badge status-${user.status || 'pending'}">
+            ${escapeHTML((user.status || 'pending').toUpperCase())}
+          </span>
+        </td>
+        <td class="actions-col">
+          <div class="action-btn-group">
+            ${!isSuperAdmin ? `
+              ${!isApproved ? `
+                <button class="btn-approve" data-action="approve" data-user-id="${escapeAttr(user.id)}" data-user-email="${escapeAttr(user.email)}" type="button" title="Grant access">✓ Approve</button>
+              ` : `
+                <button class="btn-reject" data-action="reject" data-user-id="${escapeAttr(user.id)}" data-user-email="${escapeAttr(user.email)}" type="button" title="Revoke access">✕ Revoke</button>
+              `}
+              <button class="btn-role-toggle" data-action="toggle-role" data-user-id="${escapeAttr(user.id)}" data-user-email="${escapeAttr(user.email)}" data-current-role="${escapeAttr(user.role || 'member')}" type="button" title="Toggle Admin/Member role">
+                Make ${user.role === 'admin' ? 'Member' : 'Admin'}
+              </button>
+              <button class="icon-button" data-action="delete" data-user-id="${escapeAttr(user.id)}" data-user-email="${escapeAttr(user.email)}" type="button" title="Delete record" style="color:var(--red);">🗑</button>
+            ` : `
+              <small style="color:var(--lime); font-weight:600;">Super Administrator</small>
+            `}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
 }

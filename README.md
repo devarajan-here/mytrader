@@ -24,6 +24,14 @@ No `npm install` is required. Node.js 20 or newer is sufficient.
 - The API key stays in `.env` on the server and is never returned to the browser.
 - Files are sent only with the individual AI request; this app does not save uploaded documents to disk.
 
+## Workspace access and IPO sync
+
+The imported workspace tools add Firebase email/Google sign-in, administrator approval controls, and an admin user-management view. Firebase project settings are loaded from `public/firebase-applet-config.json`; deploy `firestore.rules` to the matching Firebase project before using approval controls in production.
+
+IPO Watch can now merge records from a public Google Sheet or CSV URL, pasted spreadsheet rows, and uploaded CSV/JSON files. The server converts published Google Sheets links to CSV and rejects local/private network URLs. The active watchlist can also be downloaded as CSV for Google Sheets or Excel.
+
+The AI copilot can be minimized without losing the visible conversation, and strategy definitions may optionally include multiple source videos and a worked `caseStudy` with an interactive position-sizing calculator.
+
 ## Test without an API key
 
 Set `MOCK_AI=true` in `.env`, restart, and send a message. This checks the complete streaming UI and backend route without calling Gemini.
