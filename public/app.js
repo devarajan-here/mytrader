@@ -3105,7 +3105,7 @@ function bindAuth() {
       toast('Signed in successfully with Google!');
     } catch (err) {
       console.error('Google login error:', err);
-      showAuthError(err.message || 'Google sign-in failed.');
+      showAuthError(formatAuthError(err));
     }
   });
 
@@ -3118,7 +3118,7 @@ function bindAuth() {
         toast('Signed in successfully with Google!');
       } catch (err) {
         console.error('Gate Google login error:', err);
-        toast(`Sign-in failed: ${err.message}`);
+        toast(formatAuthError(err));
       }
     });
   }
@@ -3156,7 +3156,7 @@ function bindAuth() {
       closeAuthModal();
     } catch (err) {
       console.error('Auth error:', err);
-      showAuthError(err.message?.replace('Firebase: ', '') || 'Authentication error occurred.');
+      showAuthError(formatAuthError(err));
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = authMode === 'login' ? 'Sign In' : 'Create Account';
@@ -3381,6 +3381,24 @@ function showAuthError(msg) {
   } else {
     errEl.hidden = true;
   }
+}
+
+function formatAuthError(err) {
+  const code = String(err?.code || '');
+  if (code === 'auth/unauthorized-domain' || code === 'auth/internal-error') {
+    const host = window.location.hostname || 'this domain';
+    return `Firebase sign-in is not configured for ${host}. Add ${host} under Firebase Authentication → Settings → Authorized domains, and make sure the selected sign-in provider is enabled.`;
+  }
+  if (code === 'auth/operation-not-allowed') {
+    return 'This sign-in method is disabled. Enable it under Firebase Authentication → Sign-in method.';
+  }
+  if (code === 'auth/popup-blocked') {
+    return 'The sign-in popup was blocked. Allow popups for this page and try again.';
+  }
+  if (code === 'auth/popup-closed-by-user') {
+    return 'Sign-in was cancelled before it finished.';
+  }
+  return err?.message?.replace(/^Firebase:\s*/, '') || 'Authentication error occurred.';
 }
 
 function openAccountModal() {

@@ -520,7 +520,7 @@ function setSecurityHeaders(res) {
   res.setHeader('Referrer-Policy', 'no-referrer');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data: https://*.tradingview.com https://*.tvcdn.io https://*.googleusercontent.com; style-src 'self' 'unsafe-inline' https://*.tradingview.com; script-src 'self' 'unsafe-inline' https://s3.tradingview.com https://*.tradingview.com https://www.gstatic.com; frame-src https://*.tradingview.com https://accounts.google.com https://*.firebaseapp.com; connect-src 'self' https://*.tradingview.com https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
+  res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data: https://*.tradingview.com https://*.tvcdn.io https://*.googleusercontent.com; style-src 'self' 'unsafe-inline' https://*.tradingview.com; script-src 'self' 'unsafe-inline' https://s3.tradingview.com https://*.tradingview.com https://www.gstatic.com https://apis.google.com https://accounts.google.com; frame-src https://*.tradingview.com https://accounts.google.com https://*.firebaseapp.com; connect-src 'self' https://*.tradingview.com https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
 }
 
 function isPrivateHostname(hostname) {
