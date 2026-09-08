@@ -326,10 +326,11 @@ async function getLiveIpos(force = false) {
 
   const payload = await response.json();
   if (!Array.isArray(payload)) throw new Error('NSE returned an unexpected response');
+  const today = new Date().toISOString().slice(0, 10);
   const ipos = payload
     .filter((item) => item?.series === 'EQ' && item?.companyName)
     .map(normalizeNseIpo)
-    .filter((item) => item.openDate && item.closeDate);
+    .filter((item) => item.openDate && item.closeDate && item.closeDate >= today);
 
   nseCache = {
     source: 'NSE India',

@@ -933,7 +933,7 @@ async function syncLiveIpos(force = false) {
 
 function mergeLiveIpos(liveIpos) {
   const existing = state.ipos;
-  const merged = [...existing];
+  const merged = existing.filter((ipo) => ipo?.source !== 'nse' && ipo?.source !== 'seed');
 
   for (const live of liveIpos) {
     const existingIndex = merged.findIndex((ipo) =>
