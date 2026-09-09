@@ -522,13 +522,14 @@
           </div>
 
           <div class="coach-controls">
-            <label><span>Mode</span><select id="chat-mode"><option value="general">Research copilot</option><option value="ipo">IPO teardown</option><option value="tutor">Learning tutor</option><option value="risk">Risk reviewer</option></select></label>
+            <label><span>Mode</span><select id="chat-mode"><option value="general">Research copilot</option><option value="decision">Stock decision & entry guide</option><option value="ipo">IPO teardown</option><option value="tutor">Learning tutor</option><option value="risk">Risk reviewer</option></select></label>
             <label><span>Company context</span><select id="chat-ipo-select"><option value="">No IPO selected</option></select></label>
           </div>
 
           <div class="chat-messages" id="chat-messages" aria-live="polite"></div>
 
           <div class="quick-prompts" id="quick-prompts">
+            <button type="button" data-prompt-action="decision">Should I buy or wait?</button>
             <button type="button" data-prompt-action="teardown">✦ 20-Yr Analyst Deep Teardown</button>
             <button type="button" data-prompt="Analyze this stock setup against Bharat Jhunjhunwala's 3-Indicator Swing Trading System: (1) Moving Average trend direction & contraction vs expansion phase, (2) ZigZag (dev 3, pivot 2) market structure for CHOCH / BOS & Higher Lows, (3) MACD histogram momentum confirmation above zero, (4) Exact Stop-Loss below ZigZag swing low / lower MA, and (5) 1:2 to 1:3+ RRR trade management with Breakeven shift and trailing runner.">Review 3-Indicator Swing Setup</button>
             <button type="button" data-prompt="Give me a fast IPO due-diligence checklist for this company.">Due-diligence checklist</button>

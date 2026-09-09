@@ -2519,6 +2519,14 @@ function bindChat() {
       $('#chat-input').focus();
       return;
     }
+    if (button.dataset.promptAction === 'decision') {
+      $('#chat-mode').value = 'decision';
+      const symbol = $('#g-symbol')?.value?.trim() || $('#p-symbol')?.value?.trim();
+      $('#chat-input').value = `Help me decide whether to buy ${symbol || 'this stock (I will supply its name and chart)'} or wait for a 1–4 week paper trade. Start with a conclusion, explain the evidence, then give the entry conditions, invalidation/stop, target method, and my next three actions in TradingView. Do not treat worksheet example prices as real evidence. Tell me what chart readings or dated filings are missing; do not invent current results or prices.`;
+      autoSizeComposer();
+      $('#chat-input').focus();
+      return;
+    }
     if (button.dataset.prompt) {
       $('#chat-input').value = button.dataset.prompt;
       autoSizeComposer();
@@ -2726,6 +2734,11 @@ async function sendChat(event) {
         attachments,
         context: {
           mode: $('#chat-mode').value,
+          stockDecision: {
+            symbol: $('#g-symbol')?.value?.trim() || $('#p-symbol')?.value?.trim() || null,
+            observation: $('#g-note')?.value || $('#p-note')?.value || null,
+            evidenceStatus: 'User-entered observations only. Worksheet defaults are not market quotes. TradingView chart is not automatically visible to the copilot; attach a screenshot for analysis.',
+          },
           selectedIPO,
           learningProgress: { completed: stats.done, total: stats.total, percent: stats.pct },
         },
