@@ -1,3 +1,4 @@
+import { mountDevaGuide } from './deva-guide.js';
 const money = n => new Intl.NumberFormat('en-IN', { style:'currency', currency:'INR' }).format(n);
 const key = 'marketmind-practice-v1';
 let journal;
@@ -83,9 +84,34 @@ export function openPractice(strategy) {
   };
   $('save').onclick=()=>{
     const pnl=render(); if(pnl===null)return;
-    const inputs=Object.fromEntries([...root.querySelectorAll('input')].map(el=>[el.id.slice(2),el.value]));
+    const inputs=Object.fromEntries([...root.querySelectorAll('input[id^="p-"]')].map(el=>[el.id.slice(2),el.value]));
     const item={strategy:strategy.id,symbol:$('symbol').value,time:new Date().toISOString(),pnl,inputs,note:$('note').value,source:quote?'NSE stock as of '+quote.asOf+'; other prices manual':'Manual scenario'};
     try { const next=[...journal,item];localStorage.setItem(key,JSON.stringify(next));journal=next;list();$('feed').textContent='Practice snapshot saved.'; }catch{$('feed').textContent='Could not save: browser storage is full or unavailable.';}
   };
   render();list();
+  if (strategy.id === 'deva-strategy') {
+    const worksheet = document.createElement('section');
+    worksheet.hidden = true;
+    worksheet.className = 'deva-worksheet';
+    [...root.children].filter(el => el !== $('back')).forEach(el => worksheet.append(el));
+    const guide = document.createElement('section');
+    guide.className = 'deva-guide';
+    const returnButton = document.createElement('button');
+    returnButton.type = 'button';
+    returnButton.className = 'button secondary';
+    returnButton.textContent = '← Back to guided lesson';
+    returnButton.onclick = () => { worksheet.hidden = true; guide.hidden = false; guide.scrollIntoView({ block: 'start' }); };
+    worksheet.prepend(returnButton);
+    root.append(guide, worksheet);
+    mountDevaGuide(guide, (symbol, notes) => {
+      $('symbol').value = symbol;
+      if (!$('note').value) $('note').value = notes;
+      quote = null;
+      $('feed').textContent = 'Manual example prices — replace them with your observed values. This worksheet does not read TradingView.';
+      render();
+      guide.hidden = true;
+      worksheet.hidden = false;
+      worksheet.scrollIntoView({ block: 'start' });
+    });
+  }
 }

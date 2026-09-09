@@ -2395,6 +2395,30 @@ a.strategy-reference:hover { border-color: var(--lime); }
   font-size: 13px;
   color: var(--muted);
 }
+.deva-guide, .deva-worksheet { max-width: 980px; margin: 24px auto; }
+.deva-guide[hidden], .deva-worksheet[hidden] { display: none; }
+.deva-guide-heading h2 { font-size: clamp(24px, 3vw, 36px); margin: 12px 0; }
+.deva-guide p { color: var(--muted); line-height: 1.8; }
+.deva-guide a { color: var(--lime); }
+.deva-guide label, .deva-observation { display: grid; gap: 10px; }
+.deva-symbol { max-width: 300px; margin: 18px 0; }
+#practice-desk input, #practice-desk textarea { background: #101a2c; color: #eef3fc; border: 1px solid #34435c; border-radius: 8px; padding: 12px; font: inherit; min-width: 0; }
+.deva-guide progress { width: 100%; accent-color: var(--lime); }
+.deva-step-nav { display: flex; gap: 8px; overflow-x: auto; padding: 16px 0; }
+.deva-step-nav button { flex-shrink: 0; max-width: 210px; white-space: normal; }
+.deva-step-nav [aria-current] { border-color: var(--lime); color: var(--lime); }
+.deva-lesson { background: #101929; border: 1px solid var(--line); border-radius: 16px; padding: clamp(16px, 3vw, 30px); }
+.deva-lesson h3 { font-size: 25px; margin-top: 0; }
+.deva-action { border-left: 3px solid var(--lime); background: #19243a; padding: 18px; margin: 20px 0; }
+.deva-action p { margin-bottom: 0; }
+.deva-guide fieldset { border: 1px solid #34435c; padding: 18px; margin: 24px 0; border-radius: 10px; }
+.deva-guide fieldset label { display: flex; align-items: baseline; margin-top: 15px; line-height: 1.6; }
+.deva-guide input[type=radio] { accent-color: var(--lime); }
+.deva-feedback { border-left: 3px solid #73d9b5; padding: 12px 18px; }
+.deva-guide-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+.deva-guide svg { width: 100%; max-width: 500px; display: block; margin: 20px 0; }
+.deva-guide svg text { fill: #e2e8f0; font-size: 14px; }
+.deva-source { font-size: 12px; }
 .export-summary-box strong {
   color: var(--text);
 }
