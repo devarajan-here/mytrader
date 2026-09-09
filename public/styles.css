@@ -2419,6 +2419,11 @@ a.strategy-reference:hover { border-color: var(--lime); }
 .deva-guide svg { width: 100%; max-width: 500px; display: block; margin: 20px 0; }
 .deva-guide svg text { fill: #e2e8f0; font-size: 14px; }
 .deva-source { font-size: 12px; }
+.trading-words { margin: 24px 0; padding: 18px; border: 1px solid #34435c; border-radius: 12px; background: #111d30; }
+.trading-words h3 { font-size: 19px; }
+.trading-words details { border-top: 1px solid #34435c; padding: 14px 0; }
+.trading-words summary, .practice-glossary > summary { cursor: pointer; color: var(--lime); line-height: 1.6; }
+.trading-words p { color: var(--muted); line-height: 1.8; }
 .export-summary-box strong {
   color: var(--text);
 }

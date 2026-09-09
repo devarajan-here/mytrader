@@ -1,4 +1,6 @@
+import { explainWords } from './trading-words.js';
 const storageKey = 'deva-guided-lesson-v1';
+const lessonWords = [[], [], ['Candle', 'LTP', 'Volume'], ['EMA'], ['EMA'], ['Resistance', 'Support', 'Breakout', 'Volume', 'RSI'], ['P&L', 'Drawdown', 'Profit factor', 'Slippage'], ['ATR', 'Stop-loss', 'Target', 'Reward-to-risk']];
 const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const steps = [
   { title:'Start with the business', text:'A good company is not automatically a good entry today. First say what it earns money from. Muthoot Finance lends against pledged gold jewellery; you are buying a lender, not a piece of gold.',
@@ -58,6 +60,7 @@ export function mountDevaGuide(root, onPractice) {
       '<div class="deva-action"><strong>Do this now</strong><p>'+escape(step.action)+'</p></div>'+
       (step.link?'<a href="'+step.link[1]+'" target="_blank" rel="noopener noreferrer">'+escape(step.link[0])+' ↗</a>':'')+
       (step.script?'<div class="deva-guide-actions"><button class="button primary" id="g-copy">Copy Deva script</button><a href="/deva-strategy.pine" download class="button secondary">Download script</a></div>':'')+
+      (lessonWords[index].length ? explainWords(lessonWords[index]) : '')+
       '<fieldset><legend>Quick check: '+escape(step.question)+'</legend>'+step.choices.map((c,i)=>'<label><input type="radio" name="guide-answer" value="'+i+'" '+(answers[index]===i?'checked':'')+'>'+escape(c)+'</label>').join('')+'</fieldset>'+
       (answered?'<p class="deva-feedback" role="status"><strong>'+(correct?'That’s right. ':'Take another look. ')+'</strong>'+escape(step.feedback)+'</p>':'')+
       '<label class="deva-observation">What do you see on your chart?<textarea id="g-note" rows="3" placeholder="For example: price is below both averages, so I am waiting.">'+escape(notes[index]||'')+'</textarea></label>'+

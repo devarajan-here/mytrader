@@ -1,0 +1,26 @@
+export const TRADING_WORDS = {
+  EMA: ['Exponential Moving Average', 'An average price that gives more weight to recent candles, helping you see the direction behind daily ups and downs.', 'If price is ₹110 and its 20-day EMA is ₹105, price is above that average. This alone does not mean buy. On a 1D chart, 20 EMA uses daily candles; on a 15-minute chart, it uses 15-minute candles.'],
+  RSI: ['Relative Strength Index', 'A score from 0 to 100 comparing the size of recent upward and downward price changes. It describes momentum, not the chance of making money.', 'RSI 60 shows stronger recent gains than losses over its calculation window. It does NOT mean a 60% chance the stock will rise. RSI(14) uses 14 periods.'],
+  LTP: ['Last Traded Price', 'The price of the most recent completed trade. It can be old when trading is quiet or the market is closed.', 'If the last buyer and seller traded at ₹100, LTP is ₹100. The next available buying price might be ₹100.20, so your order may fill elsewhere.'],
+  ATR: ['Average True Range', 'A measure of recent price movement, including gaps between trading days. It measures movement size, not direction.', 'ATR ₹10 gives a 2×ATR stop distance of ₹20. For an example entry at ₹1,000, that puts the stop at ₹980. It does not promise tomorrow stays within ₹10.'],
+  Volume: ['Number of shares traded', 'How many shares changed hands during a candle. High volume means more activity, not automatically more buying pressure.', 'If the previous daily average is 1 lakh shares, Deva requires at least 1.5 lakh today: 1.5× the average.'],
+  Resistance: ['An area where rises previously stalled', 'A price zone where selling has repeatedly slowed an advance. It can break; it is not a ceiling that must hold.', 'If price rose toward ₹110 several times then fell, roughly ₹110 may be resistance.'],
+  Support: ['An area where falls previously slowed', 'A price zone where buying previously helped stop a decline. Price can still fall through it.', 'If declines repeatedly paused around ₹95, that area may be support—not a guaranteed safe buying price.'],
+  Breakout: ['Price moves beyond a previous range', 'For Deva, the completed daily candle must close above the highest price of the previous 20 candles.', 'Resistance is ₹110. A daily high of ₹112 but close of ₹109 does not pass. A close of ₹112 passes the price test; other checks are still needed.'],
+  Candle: ['One period of price activity', 'Its body connects opening and closing prices; its wicks show the high and low. One 1D candle represents a trading day.', 'Open ₹100, high ₹106, low ₹98, close ₹104: a standard green body runs from ₹100 to ₹104, with wicks to ₹98 and ₹106.'],
+  'Stop-loss': ['Your planned exit if wrong', 'A price or loss limit at which you intend to exit. Gaps and execution delays can cause a larger actual loss.', 'Buy at ₹100 and plan a stop at ₹95: intended price risk is ₹5 per share. If the next available price is ₹92, the loss can exceed ₹5.'],
+  Target: ['Your planned profit-taking level', 'A price you aim to exit at if the trade moves your way. It is a plan, not a prediction.', 'Entry ₹100, target ₹110: planned gain is ₹10 per share before costs, only if the exit actually fills there.'],
+  'Reward-to-risk': ['Planned gain compared with planned loss', 'Compare target minus entry with entry minus stop for a long trade.', 'Entry ₹100, stop ₹95, target ₹110: ₹10 reward divided by ₹5 risk = 2:1, also called 2R. This says nothing about win probability.'],
+  'P&L': ['Profit and loss', 'How much a position has gained or lost. Before you close, it is an unrealised result; after closing, it is realised.', 'Buy 10 shares at ₹100 and sell at ₹105: gross profit is ₹50. Subtract fees and taxes for net profit.'],
+  Drawdown: ['Fall from a previous account peak', 'The decline from a high point in your account value to a later low point during a test.', 'An account rises to ₹1,10,000 then falls to ₹1,00,000: drawdown is ₹10,000, about 9.1% of that peak.'],
+  Slippage: ['The difference between expected and filled price', 'The market can move or have too little volume at your expected price.', 'You expect to buy at ₹100 but fill at ₹100.30: that is ₹0.30 adverse slippage per share.'],
+  'Profit factor': ['Gross profits divided by gross losses', 'A backtest summary comparing money won across winning trades with money lost across losing trades.', '₹1,200 in winning trades divided by ₹1,000 in losing trades = 1.2. It is not a 120% return or a forecast.'],
+};
+const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+export function explainWords(words = Object.keys(TRADING_WORDS)) {
+  return '<aside class="trading-words" aria-label="Trading words explained"><h3>What do these words mean?</h3><p>Tap a word for its meaning and a made-up example. These numbers are not live stock prices.</p>' +
+    words.filter(word => TRADING_WORDS[word]).map(word => {
+      const [name, meaning, example] = TRADING_WORDS[word];
+      return '<details><summary>'+esc(word)+' — '+esc(name)+'</summary><p>'+esc(meaning)+'</p><p><strong>Simple example:</strong> '+esc(example)+'</p></details>';
+    }).join('') + '</aside>';
+}
