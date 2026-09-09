@@ -1555,7 +1555,7 @@ function renderStrategyCatalog() {
   }
 
   $('#strategy-catalog').innerHTML = STRATEGIES.map((strategy, index) => `
-    <button class="strategy-card" type="button" data-strategy-id="${escapeAttr(strategy.id)}" data-accent="${escapeAttr(strategy.accent)}">
+    <div class="strategy-card-with-video"><button class="strategy-card" type="button" data-strategy-id="${escapeAttr(strategy.id)}" data-accent="${escapeAttr(strategy.accent)}">
       <span class="strategy-card-top"><span class="strategy-card-index">${String(index + 1).padStart(2, '0')}</span><span class="strategy-card-risk">${escapeHTML(strategy.risk)}</span></span>
       <h2>${escapeHTML(strategy.name)}</h2>
       <p>${escapeHTML(strategy.subtitle)}</p>
@@ -1564,7 +1564,7 @@ function renderStrategyCatalog() {
         <span>Target<strong>${escapeHTML(strategy.targetROI)}</strong></span>
       </span>
       <span class="strategy-card-open">↗</span>
-    </button>`).join('');
+    </button>${strategy.videoUrl ? `<a class="strategy-reference" href="${escapeAttr(safeURL(strategy.videoUrl))}" target="_blank" rel="noopener noreferrer"><strong>▶ Watch reference video ↗</strong><span>${escapeHTML(strategy.videoTitle || strategy.name)}</span><small>${escapeHTML(strategy.videoChannel || strategy.source)}</small></a>` : '<p class="strategy-reference">Additional practice setup · no reference video supplied</p>'}</div>`).join('');
 }
 
 function openStrategy(id) {
@@ -1641,7 +1641,7 @@ function renderStrategyDetail(strategy) {
   } else if (strategy.videoUrl) {
     linksWrap.innerHTML = `
       <a class="strategy-video-link" href="${safeURL(strategy.videoUrl)}" target="_blank" rel="noopener noreferrer">
-        ▶ Watch source: ${escapeHTML(strategy.source || 'Strategy Video')} ↗
+        ▶ Watch reference video: ${escapeHTML(strategy.videoTitle || strategy.source || 'Strategy Video')} — ${escapeHTML(strategy.videoChannel || '')} ↗
       </a>
     `;
   } else {

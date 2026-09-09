@@ -187,3 +187,14 @@ export const STRATEGIES = [
      'The 5% strike distance and income figures in the notes are examples, not assured outcomes.'],
     'https://youtu.be/z1JigibE_YM', 'covered', 'Advanced'),
 ];
+
+const REFERENCES = {
+  'futures-convergence-arbitrage': ['Futures Convergence Magic 🤯 Hidden Profit Strategy മലയാളത്തില്‍', 'Dhan Malayalam', 'https://youtu.be/Vb-da5eVMr0?si=Y6zZNDRFlhqY6HlM'],
+  'momentum-swing': ['Select Best Stocks for Swing Trading Returns | With Screener', 'marketfeed', 'https://youtu.be/hn7vFiEFxcA?si=2t2wbqd4PzFPXCma'],
+  'athishaktham-1pct': ['My Option Selling Trading Strategy Revealed', 'Sharique Samsudheen', 'https://youtu.be/mEoxn5-zcOg?si=I9GhGw_uAha1aUbR'],
+  'covered-call-income': ['Covered Call Option Strategy Malayalam Video', 'marketfeed malayalam', 'https://youtu.be/z1JigibE_YM?si=7T1v_h9oWT1nJQe7'],
+};
+for (const strategy of STRATEGIES) {
+  const reference = REFERENCES[strategy.id];
+  if (reference) [strategy.videoTitle, strategy.videoChannel, strategy.videoUrl] = reference;
+}

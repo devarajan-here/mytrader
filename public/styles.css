@@ -481,6 +481,12 @@ select, .modal-fields input {
   text-align: left;
   transition: transform 160ms ease, border-color 160ms ease;
 }
+.strategy-card-with-video { display: flex; flex-direction: column; min-width: 0; }
+.strategy-card-with-video > .strategy-card { width: 100%; flex: 1; }
+.strategy-reference { display: flex; flex-direction: column; gap: 8px; padding: 18px; margin: 10px 0 0; border: 1px solid var(--line); border-radius: 12px; color: var(--text); background: rgba(200,240,93,.05); text-decoration: none; line-height: 1.5; }
+.strategy-reference strong { color: var(--lime); }
+.strategy-reference small { color: var(--muted); }
+a.strategy-reference:hover { border-color: var(--lime); }
 .strategy-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--strategy-accent) 35%, var(--line)); }
 .strategy-card[data-accent="blue"] { --strategy-accent: var(--blue); }
 .strategy-card[data-accent="orange"] { --strategy-accent: var(--orange); }

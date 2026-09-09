@@ -15,7 +15,7 @@ export function openPractice(strategy) {
   const futures = strategy.kind === 'futures';
   const field = (id, label, value, type='number') => '<label style="display:grid;gap:8px"><span>'+label+'</span><input id="p-'+id+'" type="'+type+'" value="'+value+'" '+(type==='number'?'min="0" step="any"':'')+'></label>';
   root.innerHTML = '<button class="button secondary" id="p-back">← Choose a strategy</button><h1>'+esc(strategy.name)+'</h1><p>'+esc(strategy.subtitle)+'</p><p><strong>Paper trading · no real orders</strong> · Saved in this browser</p><details open><summary>How to practice</summary><ol>'+strategy.rules.map(r=>'<li>'+esc(r)+'</li>').join('')+'</ol></details>'+
-    (strategy.videoUrl?'<a target="_blank" rel="noopener noreferrer" href="'+strategy.videoUrl+'">Source video ↗</a>':'')+
+    (strategy.videoUrl?'<a class="strategy-reference" target="_blank" rel="noopener noreferrer" href="'+esc(strategy.videoUrl)+'"><strong>▶ Watch reference video first ↗</strong><span>'+esc(strategy.videoTitle || strategy.name)+'</span><small>'+esc(strategy.videoChannel || '')+'</small></a>':'')+
     '<p>1. Study the chart and rules. 2. Record entry and risk. 3. Update prices. 4. Save and review your result.</p>'+
     '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;margin:24px 0">'+
     field('symbol','NSE symbol / underlying','INFY','text')+field('capital','Practice capital ₹',100000)+field('qty','Quantity (shares / contract units)',1)+
