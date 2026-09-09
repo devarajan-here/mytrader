@@ -151,6 +151,22 @@ const practiceStrategy = (id, name, subtitle, rules, videoUrl, kind, risk = 'Int
   entryTiming: kind === 'equity' ? 'Daily chart · roughly 1–5 weeks' : 'Choose actual contracts and expiry dates',
 });
 export const STRATEGIES = [
+  {
+    ...practiceStrategy('deva-strategy', 'Deva Strategy',
+      'Your daily stock breakout checklist: trend, price strength, volume, and momentum. Test it on TradingView, then record paper trades here.',
+      ['Use standard daily (1D) stock candles. Start with liquid stocks and enough price history.',
+       'Trend: price above 50 EMA, 20 EMA above 50 EMA, and 50 EMA higher than five trading days ago.',
+       'Breakout: daily close above the highest high of the PREVIOUS 20 candles. Volume must be at least 1.5× the previous 20-day average.',
+       'Momentum: RSI(14) between 50 and 70. All conditions must hold at candle close; otherwise WAIT.',
+       'The script simulates entry at the next bar, with a stop distance of 2× ATR(14) and a target twice that distance from the actual simulated fill.',
+       'Quantity uses 1% equity risk before costs and at most 20% allocation at the signal price. Gaps and costs can exceed those planned limits.',
+       'Exit at stop or target, or after a close below 20 EMA, or after 20 trading days. Trend/time exits fill on the next available bar.',
+       'Test different stocks and unused date ranges; inspect losing trades, drawdown, and costs. This is a new research idea with no measured accuracy yet.'],
+      '', 'equity', 'Research / paper only'),
+    source: 'Deva custom strategy · research version 1',
+    targetROI: 'Target 2× stop distance; no promised return',
+    scriptUrl: '/deva-strategy.pine',
+  },
   LEGACY_STRATEGIES[0],
   practiceStrategy('momentum-swing', 'Momentum Swing · 10 / 21 EMA',
     'Practice buying a rising stock after a breakout or a moving-average crossover.',

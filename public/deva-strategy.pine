@@ -1,0 +1,73 @@
+//@version=6
+strategy("Deva Strategy - Daily Breakout v1", overlay=true, initial_capital=100000, currency=currency.INR, pyramiding=0, commission_type=strategy.commission.percent, commission_value=0.1, slippage=2, margin_long=100, calc_on_every_tick=false, process_orders_on_close=false)
+
+// Educational hypothesis, not a validated edge or probability of profit.
+// Use standard daily stock candles. Orders are simulated, not sent to a broker.
+fastLength = input.int(20, "Fast EMA days", minval=2)
+slowLength = input.int(50, "Slow EMA days", minval=3)
+breakoutLength = input.int(20, "Prior high lookback", minval=2)
+volumeMultiplier = input.float(1.5, "Volume / prior 20-day average", minval=1, step=0.1)
+riskPercent = input.float(1, "Equity risk per trade (%) before costs", minval=0.1, maxval=2, step=0.1)
+allocationPercent = input.float(20, "Maximum stock allocation (%) at signal price", minval=1, maxval=100)
+atrMultiplier = input.float(2, "Stop distance in ATR", minval=0.5, step=0.25)
+rewardMultiple = input.float(2, "Target / stop distance", minval=1, step=0.25)
+maxBars = input.int(20, "Exit after trading days", minval=1, maxval=60)
+
+emaFast = ta.ema(close, fastLength)
+emaSlow = ta.ema(close, slowLength)
+priorHigh = ta.highest(high, breakoutLength)[1]
+priorVolume = ta.sma(volume, 20)[1]
+atr = ta.atr(14)
+rsi = ta.rsi(close, 14)
+daily = timeframe.isdaily and timeframe.multiplier == 1
+ready = not na(emaSlow[5]) and not na(priorHigh) and not na(priorVolume) and priorVolume > 0 and not na(atr)
+trendOK = close > emaSlow and emaFast > emaSlow and emaSlow > emaSlow[5]
+breakoutOK = close > priorHigh
+volumeOK = volume >= priorVolume * volumeMultiplier
+momentumOK = rsi >= 50 and rsi <= 70
+setup = daily and ready and barstate.isconfirmed and trendOK and breakoutOK and volumeOK and momentumOK
+
+var int riskTicks = na
+var int targetTicks = na
+signalRiskTicks = math.max(1, int(math.ceil(atr * atrMultiplier / syminfo.mintick)))
+signalRisk = signalRiskTicks * syminfo.mintick
+quantity = math.floor(math.min(strategy.equity * riskPercent / 100 / signalRisk, strategy.equity * allocationPercent / 100 / close))
+enter = setup and strategy.position_size == 0 and quantity >= 1
+if enter
+    riskTicks := signalRiskTicks
+    targetTicks := int(math.round(riskTicks * rewardMultiple))
+    strategy.entry("Deva Long", strategy.long, qty=quantity)
+    strategy.exit("Deva bracket", "Deva Long", loss=riskTicks, profit=targetTicks)
+    alert("Deva setup confirmed: " + syminfo.ticker + ". Paper-test only. Next-bar simulated entry; review gaps and costs.", alert.freq_once_per_bar_close)
+
+// Tick distances anchor exits to the actual simulated entry fill, not signal close.
+if strategy.position_size > 0
+    strategy.exit("Deva bracket", "Deva Long", loss=riskTicks, profit=targetTicks)
+    heldBars = bar_index - strategy.opentrades.entry_bar_index(0) + 1
+    if barstate.isconfirmed and (close < emaFast or heldBars >= maxBars)
+        strategy.close("Deva Long", comment="Trend/time exit")
+
+plot(emaFast, "Fast EMA", color=color.orange)
+plot(emaSlow, "Slow EMA", color=color.blue, linewidth=2)
+plot(priorHigh, "Previous range high", color=color.new(color.gray, 45))
+plot(strategy.position_size > 0 ? strategy.position_avg_price : na, "Simulated entry", color=color.white, style=plot.style_linebr)
+plot(strategy.position_size > 0 ? strategy.position_avg_price - riskTicks * syminfo.mintick : na, "Stop", color=color.red, style=plot.style_linebr)
+plot(strategy.position_size > 0 ? strategy.position_avg_price + targetTicks * syminfo.mintick : na, "Target", color=color.lime, style=plot.style_linebr)
+plotshape(enter, title="Confirmed setup", text="DEVA\nSETUP", style=shape.labelup, location=location.belowbar, color=color.lime, textcolor=color.black)
+
+var table dashboard = table.new(position.top_right, 2, 7, bgcolor=color.new(color.black, 15))
+if barstate.islast
+    table.cell(dashboard, 0, 0, "DEVA STRATEGY", text_color=color.white)
+    table.cell(dashboard, 1, 0, not daily ? "Use 1D candles" : not ready ? "More history needed" : not barstate.isconfirmed ? "Candle still forming" : setup ? "Setup confirmed" : "WAIT", text_color=setup ? color.lime : color.orange)
+    table.cell(dashboard, 0, 1, "Rising trend", text_color=color.white)
+    table.cell(dashboard, 1, 1, trendOK ? "PASS" : "WAIT", text_color=trendOK ? color.lime : color.orange)
+    table.cell(dashboard, 0, 2, "Break above prior high", text_color=color.white)
+    table.cell(dashboard, 1, 2, breakoutOK ? "PASS" : "WAIT", text_color=breakoutOK ? color.lime : color.orange)
+    table.cell(dashboard, 0, 3, "Stronger volume", text_color=color.white)
+    table.cell(dashboard, 1, 3, volumeOK ? "PASS" : "WAIT", text_color=volumeOK ? color.lime : color.orange)
+    table.cell(dashboard, 0, 4, "RSI 50 to 70", text_color=color.white)
+    table.cell(dashboard, 1, 4, momentumOK ? "PASS" : "WAIT", text_color=momentumOK ? color.lime : color.orange)
+    table.cell(dashboard, 0, 5, "Current bar", text_color=color.white)
+    table.cell(dashboard, 1, 5, barstate.isconfirmed ? "Closed" : "Unconfirmed", text_color=color.white)
+    table.cell(dashboard, 0, 6, "Research version v1", text_color=color.white)
+    table.cell(dashboard, 1, 6, "No guaranteed gains", text_color=color.white)

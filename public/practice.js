@@ -16,6 +16,7 @@ export function openPractice(strategy) {
   const field = (id, label, value, type='number') => '<label style="display:grid;gap:8px"><span>'+label+'</span><input id="p-'+id+'" type="'+type+'" value="'+value+'" '+(type==='number'?'min="0" step="any"':'')+'></label>';
   root.innerHTML = '<button class="button secondary" id="p-back">← Choose a strategy</button><h1>'+esc(strategy.name)+'</h1><p>'+esc(strategy.subtitle)+'</p><p><strong>Paper trading · no real orders</strong> · Saved in this browser</p><details open><summary>How to practice</summary><ol>'+strategy.rules.map(r=>'<li>'+esc(r)+'</li>').join('')+'</ol></details>'+
     (strategy.videoUrl?'<a class="strategy-reference" target="_blank" rel="noopener noreferrer" href="'+esc(strategy.videoUrl)+'"><strong>▶ Watch reference video first ↗</strong><span>'+esc(strategy.videoTitle || strategy.name)+'</span><small>'+esc(strategy.videoChannel || '')+'</small></a>':'')+
+    (strategy.scriptUrl ? '<section class="strategy-reference"><strong>Install Deva Strategy in TradingView</strong><p>Download the script, open it as text, and copy it. In TradingView open Pine Editor → New strategy, replace the template, Save, then Add to chart. Use standard 1D candles. The checklist shows why a setup passes or waits.</p><a class="button primary" href="'+esc(strategy.scriptUrl)+'" download>Download Deva Strategy script</a><button class="button secondary" id="p-copy-script">Copy script for TradingView</button><small>Open the strategy results report to inspect historical simulated trades. Fees default to 0.1% per fill and slippage to 2 ticks; adjust them for your broker. This page records manual practice; the script runs on TradingView data. No live orders are sent.</small></section>' : '')+
     '<p>1. Study the chart and rules. 2. Record entry and risk. 3. Update prices. 4. Save and review your result.</p>'+
     '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;margin:24px 0">'+
     field('symbol','NSE symbol / underlying','INFY','text')+field('capital','Practice capital ₹',100000)+field('qty','Quantity (shares / contract units)',1)+
@@ -30,6 +31,14 @@ export function openPractice(strategy) {
     '<label style="display:grid;gap:8px">Why this trade? What did you learn?<textarea id="p-note" rows="3"></textarea></label>'+
     '<button class="button primary" id="p-save" style="margin:20px 0">Save practice snapshot</button><h2>Practice journal</h2><div id="p-journal"></div>';
   const $ = id => root.querySelector('#p-'+id);
+  if ($('copy-script')) $('copy-script').onclick = async () => {
+    try {
+      const response = await fetch(strategy.scriptUrl);
+      if (!response.ok) throw Error('Script download failed');
+      await navigator.clipboard.writeText(await response.text());
+      $('copy-script').textContent = 'Copied — paste into Pine Editor';
+    } catch { $('copy-script').textContent = 'Copy unavailable — use Download above'; }
+  };
   const n = id => Number($(id)?.value);
   let quote = null;
   function render() {

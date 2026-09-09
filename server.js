@@ -25,6 +25,7 @@ let nseCache = null;
 let nseOptionCache = null;
 
 const MIME = {
+  '.pine': 'text/plain; charset=utf-8',
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
