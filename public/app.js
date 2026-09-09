@@ -1,6 +1,7 @@
 import { STRATEGIES } from './strategies.js';
 import { openPractice } from './practice.js';
-import {
+const LOCAL_PREVIEW = ['127.0.0.1', 'localhost', '[::1]'].includes(location.hostname);
+const {
   initFirebase,
   loginWithGoogle,
   loginWithEmail,
@@ -13,7 +14,7 @@ import {
   setUserRole,
   deleteUserProfile,
   ADMIN_EMAIL
-} from './firebase-service.js';
+} = LOCAL_PREVIEW ? { ADMIN_EMAIL: 'preview-admin-disabled' } : await import('./firebase-service.js');
 
 const MODULES = [
   { id: 'basics', num: '01', name: 'Market Basics & Terminology', description: 'Build a clean foundation before touching advanced setups.', tasks: [
@@ -514,7 +515,7 @@ function bindTour() {
 
 function maybeStartTour() {
   const isSuperAdmin = (currentUser?.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase();
-  const hasWorkspaceAccess = Boolean(currentUser && (isSuperAdmin || currentProfile?.status === 'approved'));
+  const hasWorkspaceAccess = LOCAL_PREVIEW || Boolean(currentUser && (isSuperAdmin || currentProfile?.status === 'approved'));
   if (!hasWorkspaceAccess || tourAutostartScheduled) return;
   try {
     if (!localStorage.getItem(TOUR_STORAGE_KEY)) {
@@ -2960,6 +2961,15 @@ let unsubAdminUsers = null;
 let activeInspectedUser = null;
 
 async function initFirebaseAuth() {
+  if (LOCAL_PREVIEW) {
+    $('#approval-gate').hidden = true;
+    $('#auth-modal').hidden = true;
+    $('#topbar-user-name').textContent = 'Local preview';
+    $('#topbar-user-role').textContent = 'Saved on this device';
+    $('#topbar-user-role').hidden = false;
+    $('#nav-admin-item').hidden = true;
+    return;
+  }
   try {
     await initFirebase();
     onAuthStatusChanged(({ user, profile, loading }) => {
@@ -3082,6 +3092,7 @@ function handleAuthStateUpdate() {
 function bindAuth() {
   // Topbar Profile button click
   $('#user-profile-btn').addEventListener('click', () => {
+    if (LOCAL_PREVIEW) { toast('Local preview — no sign-in needed. Progress is saved in this browser.'); return; }
     if (currentUser) {
       openAccountModal();
     } else {
