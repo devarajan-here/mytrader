@@ -1,4 +1,4 @@
-export const STRATEGIES = [
+const LEGACY_STRATEGIES = [
   {
     id: 'athishaktham-1pct',
     name: '1% Athishaktham',
@@ -142,4 +142,48 @@ export const STRATEGIES = [
       ],
     },
   },
+];
+
+const practiceStrategy = (id, name, subtitle, rules, videoUrl, kind, risk = 'Intermediate') => ({
+  id, name, subtitle, rules, videoUrl, kind, risk, accent: 'sky',
+  source: 'Based on your supplied strategy notes; video claims not independently verified',
+  targetROI: 'Practice objective, not a promised return',
+  entryTiming: kind === 'equity' ? 'Daily chart · roughly 1–5 weeks' : 'Choose actual contracts and expiry dates',
+});
+export const STRATEGIES = [
+  LEGACY_STRATEGIES[0],
+  practiceStrategy('momentum-swing', 'Momentum Swing · 10 / 21 EMA',
+    'Practice buying a rising stock after a breakout or a moving-average crossover.',
+    ['Study liquid Nifty 100 stocks below ₹3,000; high beta also increases losses.',
+     'Check that NIFTY is trending upward. Look for a high-volume range breakout OR the daily 10 EMA crossing above 21 EMA.',
+     'Set a stop below a meaningful swing low. Exit if the 10 EMA crosses below 21 EMA or your stop is breached.',
+     'Size by your stop distance; the notes cap account risk at 2% and stock allocation at 20%. Start practice at 1%.',
+     'Use a planned reward of at least twice the risk. ₹50 or ₹100 is a scenario, not a forecast. Review after one week and one month.'],
+    'https://youtu.be/hn7vFiEFxcA', 'equity'),
+  practiceStrategy('swing-20ema-pullback', '20 EMA Pullback Swing',
+    'An additional learning setup: wait for a strong stock to pull back, then show renewed buying.',
+    ['Use a daily chart with price above 50 EMA and 20 EMA above 50 EMA.',
+     'Wait for a quieter pullback near 20 EMA, then a bullish confirmation candle. Enter above its high.',
+     'Put the stop below the swing low. Skip setups without room to aim for twice that risk.',
+     'Risk 1% of practice capital and allocate at most 20% to one stock.',
+     'Review daily; exit on the planned stop, target, or a daily close below the trend level. Gaps can exceed a stop.'],
+    '', 'equity', 'Beginner'),
+  practiceStrategy('futures-convergence-arbitrage', 'Futures Calendar Spread',
+    'Buy the near-month future and sell the far-month future; practice what happens as their price gap changes.',
+    ['Use the same underlying and equal contract quantities: buy near-month and sell far-month.',
+     'Record both expiries and both entry prices. Profit = quantity × (entry far-minus-near spread − current spread), less costs.',
+     'The notes suggest a historically wide gap; 220–250 points is an example, not a universal entry signal.',
+     'Set a maximum rupee loss and close both legs before the near contract expires.',
+     'The spread can widen. Two different expiries do not guarantee convergence to zero or a risk-free profit.',
+     'Confirm current exchange lot sizes and broker margins. The stated margin and monthly return figures are not guarantees.'],
+    'https://youtu.be/Vb-da5eVMr0', 'futures', 'Advanced'),
+  practiceStrategy('covered-call-income', 'Covered Call',
+    'Hold shares and sell a call against the same quantity; premium limits losses only slightly and caps gains.',
+    ['Hold exactly the number of shares covered by the sold option; verify the current lot size.',
+     'Choose a monthly call strike above the stock price, at a price where you would accept selling the shares.',
+     'Track share P&L plus entry call premium minus the current call premium, less costs.',
+     'At expiry the call payoff is deducted above the strike. A falling stock can lose much more than the premium.',
+     'Close the short call before selling its covering shares. Review physical delivery and unpledging requirements before expiry.',
+     'The 5% strike distance and income figures in the notes are examples, not assured outcomes.'],
+    'https://youtu.be/z1JigibE_YM', 'covered', 'Advanced'),
 ];

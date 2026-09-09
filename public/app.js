@@ -1,4 +1,5 @@
 import { STRATEGIES } from './strategies.js';
+import { openPractice } from './practice.js';
 import {
   initFirebase,
   loginWithGoogle,
@@ -1568,6 +1569,7 @@ function renderStrategyCatalog() {
 function openStrategy(id) {
   const strategy = STRATEGIES.find((item) => item.id === id);
   if (!strategy) return;
+  if (strategy.id !== 'athishaktham-1pct') { openPractice(strategy); return; }
   activeStrategyId = id;
   liveMarketSetup = null;
   strategyInputMode = 'video';

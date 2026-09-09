@@ -72,6 +72,22 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  if (req.method === 'GET' && req.url?.startsWith('/api/market/equity?')) {
+    const symbol = new URL(req.url, 'http://localhost').searchParams.get('symbol') || '';
+    if (!/^[A-Z0-9&-]{1,30}$/.test(symbol)) return sendJson(res, 400, { error: 'Enter an NSE symbol such as INFY.' });
+    try {
+      const headers = { 'User-Agent': 'Mozilla/5.0', 'Accept-Language': 'en-US,en;q=0.9' };
+      const landing = await fetch('https://www.nseindia.com', { headers, signal: AbortSignal.timeout(10000) });
+      const cookie = landing.headers.getSetCookie().map(x => x.split(';')[0]).join('; ');
+      const response = await fetch(`https://www.nseindia.com/api/quote-equity?symbol=${encodeURIComponent(symbol)}`, { headers: { ...headers, Cookie: cookie, Referer: 'https://www.nseindia.com/', Accept: 'application/json' }, signal: AbortSignal.timeout(10000) });
+      if (!response.ok) throw new Error(`NSE returned ${response.status}`);
+      const data = await response.json();
+      const price = Number(data.priceInfo?.lastPrice);
+      if (!(price > 0) || !data.metadata?.lastUpdateTime) throw new Error('NSE returned no timestamped quote.');
+      return sendJson(res, 200, { symbol, price, source: 'NSE India', asOf: data.metadata.lastUpdateTime, fetchedAt: new Date().toISOString() });
+    } catch (error) { return sendJson(res, 502, { error: `Quote unavailable: ${error.message}. No simulated price has been substituted.` }); }
+  }
+
   if (req.method === 'POST' && req.url === '/api/ipos/sync-sheet') {
     try {
       const body = await readJson(req, 2 * 1024 * 1024);
